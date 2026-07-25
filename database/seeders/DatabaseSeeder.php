@@ -29,7 +29,6 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'no_hp' => '081234567890',
             'alamat' => 'Kantor Koperasi Desa, Jl. Merdeka No. 1',
-            'status' => 'aktif',
         ]);
 
         User::create([
@@ -39,7 +38,6 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'no_hp' => '081234567891',
             'alamat' => 'Kantor Koperasi Desa, Jl. Merdeka No. 2',
-            'status' => 'aktif',
         ]);
 
         User::create([
@@ -49,7 +47,6 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'no_hp' => '081234567892',
             'alamat' => 'Dusun Sukamaju, RT 01 RW 02',
-            'status' => 'aktif',
         ]);
     }
 }

@@ -68,7 +68,6 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'no_hp' => $request->no_hp,
             'alamat' => $request->alamat,
-            'status' => 'aktif',
             'id_role' => 3, // Default to 'user'
         ]);
 

@@ -71,9 +71,6 @@
                         <h3 class="text-2xl font-bold text-gray-900">{{ Auth::user()->nama }}</h3>
                         <p class="text-sm text-gray-500 mt-1">{{ Auth::user()->email }}</p>
                         <div class="mt-3 flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
-                                Status: {{ ucfirst(Auth::user()->status) }}
-                            </span>
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 uppercase">
                                 {{ Auth::user()->role->nama_role ?? 'user' }}
                             </span>

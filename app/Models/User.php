@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['id_role', 'nama', 'email', 'password', 'no_hp', 'alamat', 'status'])]
+#[Fillable(['id_role', 'id_kopdes', 'nama', 'email', 'password', 'no_hp', 'alamat'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -34,5 +34,30 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(Role::class, 'id_role', 'id_role');
+    }
+
+    public function kopdes()
+    {
+        return $this->belongsTo(Kopdes::class, 'id_kopdes', 'id_kopdes');
+    }
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class, 'id_user', 'id_user');
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'id_user', 'id_user');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'id_user', 'id_user');
+    }
+
+    public function verifiedPayments()
+    {
+        return $this->hasMany(Payment::class, 'diverifikasi_oleh', 'id_user');
     }
 }
