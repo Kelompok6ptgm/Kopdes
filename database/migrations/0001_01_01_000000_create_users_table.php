@@ -24,7 +24,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->string('no_hp');
-            $table->text('alamat');
+            $table->string('kode_pos')->nullable();
+            $table->text('alamat')->nullable();
+            $table->string('foto')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

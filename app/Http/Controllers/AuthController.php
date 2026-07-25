@@ -58,7 +58,7 @@ class AuthController extends Controller
             'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:user,email'],
             'no_hp' => ['required', 'string', 'max:20'],
-            'alamat' => ['required', 'string'],
+            'kode_pos' => ['required', 'string', 'max:10'],
             'password' => ['required', 'string', 'min:8'],
         ]);
 
@@ -67,13 +67,47 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'no_hp' => $request->no_hp,
-            'alamat' => $request->alamat,
+            'kode_pos' => $request->kode_pos,
             'id_role' => 3, // Default to 'user'
         ]);
 
         Auth::login($user);
 
         return redirect('/dashboard')->with('success', 'Pendaftaran berhasil! Selamat datang.');
+    }
+
+    /**
+     * Update user profile & photo.
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'nama' => ['required', 'string', 'max:255'],
+            'no_hp' => ['required', 'string', 'max:20'],
+            'kode_pos' => ['required', 'string', 'max:10'],
+            'alamat' => ['nullable', 'string'],
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        $data = [
+            'nama' => $request->nama,
+            'no_hp' => $request->no_hp,
+            'kode_pos' => $request->kode_pos,
+            'alamat' => $request->alamat,
+        ];
+
+        if ($request->hasFile('foto')) {
+            if ($user->foto && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->foto)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->foto);
+            }
+            $data['foto'] = $request->file('foto')->store('profiles', 'public');
+        }
+
+        $user->update($data);
+
+        return back()->with('success', 'Profil dan foto berhasil diperbarui!');
     }
 
     /**

@@ -16,6 +16,8 @@ return new class extends Migration
             $table->id('id_kopdes');
             $table->string('nama_kopdes');
             $table->text('alamat');
+            $table->string('kode_pos')->nullable();
+            $table->string('provinsi')->nullable();
             $table->string('no_hp');
             $table->string('status')->default('aktif');
             $table->timestamps();
