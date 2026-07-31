@@ -267,4 +267,26 @@ class CartTransactionTest extends TestCase
             'komentar' => 'Sangat bagus!',
         ]);
     }
+
+    public function test_user_can_update_profile(): void
+    {
+        $this->actingAs($this->member);
+
+        $response = $this->post(route('profile.update'), [
+            'nama' => 'Budi Santoso Baru',
+            'no_hp' => '08999999999',
+            'kode_pos' => '54321',
+            'alamat' => 'Alamat Baru Budi',
+        ]);
+
+        $response->assertRedirect();
+        
+        $this->assertDatabaseHas('user', [
+            'id_user' => $this->member->id_user,
+            'nama' => 'Budi Santoso Baru',
+            'no_hp' => '08999999999',
+            'kode_pos' => '54321',
+            'alamat' => 'Alamat Baru Budi',
+        ]);
+    }
 }

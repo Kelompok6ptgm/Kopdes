@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Kopdes;
+use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -22,7 +24,53 @@ class DatabaseSeeder extends Seeder
             ['id_role' => 3, 'nama_role' => 'user', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        // Seed default users for testing
+        // 2. Seed Kopdes first
+        $kopdesJakarta = Kopdes::create([
+            'nama_kopdes' => 'KopDes Jakarta',
+            'no_hp' => '021123456',
+            'alamat' => 'Jl. Sudirman No. 10, Jakarta Pusat',
+            'kode_pos' => '12190',
+            'provinsi' => 'DKI Jakarta',
+            'status' => 'aktif',
+        ]);
+
+        $kopdesBogor = Kopdes::create([
+            'nama_kopdes' => 'KopDes Bogor',
+            'no_hp' => '0251654321',
+            'alamat' => 'Jl. Pajajaran No. 22, Bogor',
+            'kode_pos' => '16123',
+            'provinsi' => 'Jawa Barat',
+            'status' => 'aktif',
+        ]);
+
+        $kopdesDepok = Kopdes::create([
+            'nama_kopdes' => 'KopDes Depok',
+            'no_hp' => '021987654',
+            'alamat' => 'Jl. Margonda Raya No. 5, Depok',
+            'kode_pos' => '16424',
+            'provinsi' => 'Jawa Barat',
+            'status' => 'aktif',
+        ]);
+
+        $kopdesTangerang = Kopdes::create([
+            'nama_kopdes' => 'KopDes Tangerang',
+            'no_hp' => '021456789',
+            'alamat' => 'Jl. Serpong No. 12, Tangerang',
+            'kode_pos' => '15310',
+            'provinsi' => 'Banten',
+            'status' => 'aktif',
+        ]);
+
+        $kopdesBekasi = Kopdes::create([
+            'nama_kopdes' => 'KopDes Bekasi',
+            'no_hp' => '021321654',
+            'alamat' => 'Jl. A. Yani No. 8, Bekasi',
+            'kode_pos' => '17144',
+            'provinsi' => 'Jawa Barat',
+            'status' => 'nonaktif',
+        ]);
+
+        // 3. Seed users
         $admin = User::create([
             'id_role' => 1,
             'nama' => 'Administrator Kopdes',
@@ -109,47 +157,6 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Madu lebah liar kaya nutrisi dan stamina.',
             'harga' => 95000.00,
             'stok' => 20,
-        ]);
-
-        // Seed Kopdes
-        Kopdes::create([
-            'nama_kopdes' => 'KopDes Jakarta',
-            'email' => 'jakarta@kopdes.com',
-            'no_telp' => '021-123456',
-            'alamat' => 'Jl. Sudirman No. 10, Jakarta Pusat',
-            'status' => 'aktif',
-        ]);
-
-        Kopdes::create([
-            'nama_kopdes' => 'KopDes Bogor',
-            'email' => 'bogor@kopdes.com',
-            'no_telp' => '0251-654321',
-            'alamat' => 'Jl. Pajajaran No. 22, Bogor',
-            'status' => 'aktif',
-        ]);
-
-        Kopdes::create([
-            'nama_kopdes' => 'KopDes Depok',
-            'email' => 'depok@kopdes.com',
-            'no_telp' => '021-987654',
-            'alamat' => 'Jl. Margonda Raya No. 5, Depok',
-            'status' => 'aktif',
-        ]);
-
-        Kopdes::create([
-            'nama_kopdes' => 'KopDes Tangerang',
-            'email' => 'tangerang@kopdes.com',
-            'no_telp' => '021-456789',
-            'alamat' => 'Jl. Serpong No. 12, Tangerang',
-            'status' => 'aktif',
-        ]);
-
-        Kopdes::create([
-            'nama_kopdes' => 'KopDes Bekasi',
-            'email' => 'bekasi@kopdes.com',
-            'no_telp' => '021-321654',
-            'alamat' => 'Jl. A. Yani No. 8, Bekasi',
-            'status' => 'nonaktif',
         ]);
     }
 }

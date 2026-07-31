@@ -19,8 +19,9 @@ class KopdesController extends Controller
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('nama_kopdes', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('no_telp', 'like', "%{$search}%")
+                      ->orWhere('no_hp', 'like', "%{$search}%")
+                      ->orWhere('kode_pos', 'like', "%{$search}%")
+                      ->orWhere('provinsi', 'like', "%{$search}%")
                       ->orWhere('alamat', 'like', "%{$search}%")
                       ->orWhere('status', 'like', "%{$search}%");
                 });
@@ -47,8 +48,9 @@ class KopdesController extends Controller
     {
         $validated = $request->validate([
             'nama_kopdes' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:kopdes,email'],
-            'no_telp' => ['required', 'string', 'max:20'],
+            'no_hp' => ['required', 'string', 'max:20'],
+            'kode_pos' => ['required', 'string', 'max:10'],
+            'provinsi' => ['required', 'string', 'max:255'],
             'alamat' => ['required', 'string'],
             'status' => ['required', 'string', Rule::in(['aktif', 'nonaktif'])],
         ]);
@@ -76,8 +78,9 @@ class KopdesController extends Controller
 
         $validated = $request->validate([
             'nama_kopdes' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('kopdes', 'email')->ignore($kopdes->id_kopdes, 'id_kopdes')],
-            'no_telp' => ['required', 'string', 'max:20'],
+            'no_hp' => ['required', 'string', 'max:20'],
+            'kode_pos' => ['required', 'string', 'max:10'],
+            'provinsi' => ['required', 'string', 'max:255'],
             'alamat' => ['required', 'string'],
             'status' => ['required', 'string', Rule::in(['aktif', 'nonaktif'])],
         ]);

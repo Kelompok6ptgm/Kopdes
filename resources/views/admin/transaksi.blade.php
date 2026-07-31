@@ -4,7 +4,7 @@
 
 @section('content')
 
-<h1 class="text-3xl font-bold">
+<h1 class="text-xl md:text-2xl font-bold text-gray-800 tracking-tight">
     Halaman Transaksi
 </h1>
 

@@ -36,14 +36,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     
     Route::get('/dashboard', function () {
-        $totalKopdes = Kopdes::count();
-        $totalManager = User::where('id_role', 2)->count();
-        
-        $totalTransaksi = 0;
-        $totalPembayaran = 0;
-        $latestTransactions = collect();
+        $user = auth()->user();
+        if ($user->id_role == 1) { // Admin
+            $totalKopdes = Kopdes::count();
+            $totalManager = User::where('id_role', 2)->count();
+            
+            $totalTransaksi = \App\Models\Transaction::count();
+            $totalPembayaran = \App\Models\Payment::where('status_pembayaran', 'diverifikasi')->sum('jumlah_bayar');
+            $latestTransactions = \App\Models\Transaction::with(['kopdes', 'user'])->latest()->take(5)->get();
 
-        return view('admin.dashboard', compact('totalKopdes', 'totalManager', 'totalTransaksi', 'totalPembayaran', 'latestTransactions'));
+            return view('admin.dashboard', compact('totalKopdes', 'totalManager', 'totalTransaksi', 'totalPembayaran', 'latestTransactions'));
+        }
+        
+        // Manager or Member
+        return view('dashboard');
     })->name('dashboard');
 
     // KopDes CRUD resource
@@ -60,8 +66,15 @@ Route::middleware('auth')->group(function () {
     Route::view('/admin/transaksi', 'admin.transaksi')->name('admin.transaksi');
     Route::view('/admin/pembayaran', 'admin.pembayaran')->name('admin.pembayaran');
     Route::view('/admin/laporan', 'admin.laporan')->name('admin.laporan');
-});
-
-Route::get('/', function () {
-    return redirect()->route('login');
+    
+    // Member & Manager actions
+    Route::post('/manager/members/{id}/reset-password', [AuthController::class, 'resetMemberPassword'])->name('manager.reset-password');
+    Route::post('/checkout', [\App\Http\Controllers\TransactionController::class, 'checkout'])->name('checkout');
+    Route::post('/transaction/{id}/pay', [\App\Http\Controllers\TransactionController::class, 'uploadPayment'])->name('transaction.pay');
+    Route::post('/transaction/{id}/cancel', [\App\Http\Controllers\TransactionController::class, 'cancelTransaction'])->name('transaction.cancel');
+    Route::post('/manager/payments/{id}/verify', [\App\Http\Controllers\TransactionController::class, 'verifyPayment'])->name('manager.payments.verify');
+    Route::post('/manager/transactions/{id}/status', [\App\Http\Controllers\TransactionController::class, 'updateStatus'])->name('manager.transactions.status');
+    Route::post('/review', [\App\Http\Controllers\TransactionController::class, 'storeReview'])->name('review.store');
+    Route::post('/review/{id}/reply', [\App\Http\Controllers\TransactionController::class, 'replyReview'])->name('review.reply');
+    Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
 });
