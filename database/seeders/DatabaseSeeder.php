@@ -4,8 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Kopdes;
-use App\Models\Category;
-use App\Models\Product;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -24,18 +22,8 @@ class DatabaseSeeder extends Seeder
             ['id_role' => 3, 'nama_role' => 'user', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        // 2. Seed 1 KopDes daerah Jakarta (id_kopdes = 1)
-        $kopdesJakarta = Kopdes::create([
-            'nama_kopdes' => 'KopDes Merah Putih Jakarta',
-            'alamat' => 'Jl. Jend. Sudirman No. 88, Jakarta Selatan',
-            'kode_pos' => '12190',
-            'provinsi' => 'DKI Jakarta',
-            'no_hp' => '081298765432',
-            'status' => 'aktif',
-        ]);
-
-        // 3. Seed default users
-        User::create([
+        // Seed default users for testing
+        $admin = User::create([
             'id_role' => 1,
             'nama' => 'Administrator Kopdes',
             'email' => 'admin@kopdes.com',
@@ -45,8 +33,7 @@ class DatabaseSeeder extends Seeder
             'alamat' => 'Kantor Pusat Platform, Jakarta',
         ]);
 
-        // Manager ditugaskan mengelola KopDes Jakarta (id_kopdes = 1)
-        User::create([
+        $manager = User::create([
             'id_role' => 2,
             'id_kopdes' => $kopdesJakarta->id_kopdes,
             'nama' => 'Manager KopDes Jakarta',
@@ -57,7 +44,7 @@ class DatabaseSeeder extends Seeder
             'alamat' => 'Jl. Jend. Sudirman No. 88, Jakarta Selatan',
         ]);
 
-        User::create([
+        $user = User::create([
             'id_role' => 3,
             'nama' => 'User Kopdes',
             'email' => 'user@kopdes.com',
@@ -122,6 +109,47 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Madu lebah liar kaya nutrisi dan stamina.',
             'harga' => 95000.00,
             'stok' => 20,
+        ]);
+
+        // Seed Kopdes
+        Kopdes::create([
+            'nama_kopdes' => 'KopDes Jakarta',
+            'email' => 'jakarta@kopdes.com',
+            'no_telp' => '021-123456',
+            'alamat' => 'Jl. Sudirman No. 10, Jakarta Pusat',
+            'status' => 'aktif',
+        ]);
+
+        Kopdes::create([
+            'nama_kopdes' => 'KopDes Bogor',
+            'email' => 'bogor@kopdes.com',
+            'no_telp' => '0251-654321',
+            'alamat' => 'Jl. Pajajaran No. 22, Bogor',
+            'status' => 'aktif',
+        ]);
+
+        Kopdes::create([
+            'nama_kopdes' => 'KopDes Depok',
+            'email' => 'depok@kopdes.com',
+            'no_telp' => '021-987654',
+            'alamat' => 'Jl. Margonda Raya No. 5, Depok',
+            'status' => 'aktif',
+        ]);
+
+        Kopdes::create([
+            'nama_kopdes' => 'KopDes Tangerang',
+            'email' => 'tangerang@kopdes.com',
+            'no_telp' => '021-456789',
+            'alamat' => 'Jl. Serpong No. 12, Tangerang',
+            'status' => 'aktif',
+        ]);
+
+        Kopdes::create([
+            'nama_kopdes' => 'KopDes Bekasi',
+            'email' => 'bekasi@kopdes.com',
+            'no_telp' => '021-321654',
+            'alamat' => 'Jl. A. Yani No. 8, Bekasi',
+            'status' => 'nonaktif',
         ]);
     }
 }

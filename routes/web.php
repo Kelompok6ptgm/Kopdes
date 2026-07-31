@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KopdesController;
+use App\Http\Controllers\ManagerController;
+use App\Models\Kopdes;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -29,20 +33,35 @@ Route::post('/cart/update', [\App\Http\Controllers\CartController::class, 'updat
 Route::post('/cart/remove', [\App\Http\Controllers\CartController::class, 'removeFromCart'])->name('cart.remove');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-    
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::post('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
-    Route::post('/manager/members/{id}/reset-password', [AuthController::class, 'resetMemberPassword'])->name('manager.reset-password');
     
-    // Checkout & transactions
-    Route::post('/checkout', [\App\Http\Controllers\TransactionController::class, 'checkout'])->name('checkout');
-    Route::post('/transaction/{id}/pay', [\App\Http\Controllers\TransactionController::class, 'uploadPayment'])->name('transaction.pay');
-    Route::post('/transaction/{id}/cancel', [\App\Http\Controllers\TransactionController::class, 'cancelTransaction'])->name('transaction.cancel');
-    Route::post('/manager/payments/{id}/verify', [\App\Http\Controllers\TransactionController::class, 'verifyPayment'])->name('manager.payments.verify');
-    Route::post('/manager/transactions/{id}/status', [\App\Http\Controllers\TransactionController::class, 'updateStatus'])->name('manager.transactions.status');
-    Route::post('/review', [\App\Http\Controllers\TransactionController::class, 'storeReview'])->name('review.store');
-    Route::post('/review/{id}/reply', [\App\Http\Controllers\TransactionController::class, 'replyReview'])->name('review.reply');
+    Route::get('/dashboard', function () {
+        $totalKopdes = Kopdes::count();
+        $totalManager = User::where('id_role', 2)->count();
+        
+        $totalTransaksi = 0;
+        $totalPembayaran = 0;
+        $latestTransactions = collect();
+
+        return view('admin.dashboard', compact('totalKopdes', 'totalManager', 'totalTransaksi', 'totalPembayaran', 'latestTransactions'));
+    })->name('dashboard');
+
+    // KopDes CRUD resource
+    Route::resource('admin/kopdes', KopdesController::class)->names([
+        'index' => 'admin.kopdes',
+    ]);
+
+    // Manager CRUD resource
+    Route::resource('admin/manager', ManagerController::class)->names([
+        'index' => 'admin.manager',
+    ]);
+    Route::post('admin/manager/{id}/reset-password', [ManagerController::class, 'resetPassword'])->name('manager.reset-password');
+
+    Route::view('/admin/transaksi', 'admin.transaksi')->name('admin.transaksi');
+    Route::view('/admin/pembayaran', 'admin.pembayaran')->name('admin.pembayaran');
+    Route::view('/admin/laporan', 'admin.laporan')->name('admin.laporan');
+});
+
+Route::get('/', function () {
+    return redirect()->route('login');
 });
