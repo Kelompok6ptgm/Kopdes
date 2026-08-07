@@ -19,4 +19,9 @@ class TransactionDetail extends Model
     {
         return $this->belongsTo(Product::class, 'id_product', 'id_product');
     }
+
+    public function review()
+    {
+        return $this->hasOne(Review::class, 'id_transaction_detail', 'id_transaction_detail');
+    }
 }

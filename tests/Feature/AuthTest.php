@@ -44,7 +44,7 @@ class AuthTest extends TestCase
             'nama' => 'Budi Santoso',
             'email' => 'budi@example.com',
             'no_hp' => '08123456789',
-            'alamat' => 'Jl. Mawar No. 12',
+            'kode_pos' => '12190',
             'password' => 'password123',
         ]);
 
