@@ -289,4 +289,38 @@ class CartTransactionTest extends TestCase
             'alamat' => 'Alamat Baru Budi',
         ]);
     }
+
+    public function test_cannot_add_product_of_inactive_kopdes_to_cart(): void
+    {
+        $this->kopdes->update(['status' => 'nonaktif']);
+
+        $response = $this->post(route('cart.add'), [
+            'id_product' => $this->product->id_product,
+            'quantity' => 1,
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment(['success' => false]);
+    }
+
+    public function test_cannot_checkout_items_of_inactive_kopdes(): void
+    {
+        // Add to cart first while active
+        $this->actingAs($this->member);
+        $this->post(route('cart.add'), [
+            'id_product' => $this->product->id_product,
+            'quantity' => 1,
+        ]);
+
+        // Disable KopDes
+        $this->kopdes->update(['status' => 'nonaktif']);
+
+        // Attempt checkout
+        $response = $this->post(route('checkout'), [
+            'alamat_pengiriman' => 'Jalan Kebenaran No. 1',
+            'catatan' => 'Segera kirim ya',
+        ]);
+
+        $response->assertSessionHasErrors(['error']);
+    }
 }

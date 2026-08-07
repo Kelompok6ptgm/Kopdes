@@ -22,7 +22,14 @@ class CartController extends Controller
         $productId = $request->id_product;
         $qty = $request->quantity ?? 1;
 
-        $product = Product::findOrFail($productId);
+        $product = Product::with('kopdes')->findOrFail($productId);
+
+        if (!$product->kopdes || $product->kopdes->status !== 'aktif') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Koperasi asal produk ini sedang tidak aktif.'
+            ], 422);
+        }
 
         if ($qty > $product->stok) {
             return response()->json([
@@ -128,10 +135,14 @@ class CartController extends Controller
             'quantity' => ['required', 'integer', 'min:1'],
         ]);
 
-        $productId = $request->id_product;
-        $qty = $request->quantity;
+        $product = Product::with('kopdes')->findOrFail($productId);
 
-        $product = Product::findOrFail($productId);
+        if (!$product->kopdes || $product->kopdes->status !== 'aktif') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Koperasi asal produk ini sedang tidak aktif.'
+            ], 422);
+        }
 
         if ($qty > $product->stok) {
             return response()->json([

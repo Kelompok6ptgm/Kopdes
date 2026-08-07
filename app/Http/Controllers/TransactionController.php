@@ -40,6 +40,11 @@ class TransactionController extends Controller
         }
         $idKopdes = $kopdesIds->first();
 
+        $kopdes = \App\Models\Kopdes::find($idKopdes);
+        if (!$kopdes || $kopdes->status !== 'aktif') {
+            return back()->withErrors(['error' => 'Koperasi Desa asal barang ini sedang tidak aktif.']);
+        }
+
         try {
             $transaction = DB::transaction(function () use ($user, $cartItems, $idKopdes, $request) {
                 $totalHarga = 0;

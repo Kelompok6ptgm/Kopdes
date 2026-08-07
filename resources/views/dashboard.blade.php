@@ -732,7 +732,7 @@
             }
 
             $selectedKopdesId = request('kopdes_id', $recommendedKopdes ? $recommendedKopdes->id_kopdes : null);
-            $selectedKopdes = $selectedKopdesId ? \App\Models\Kopdes::find($selectedKopdesId) : null;
+            $selectedKopdes = $selectedKopdesId ? \App\Models\Kopdes::where('status', 'aktif')->find($selectedKopdesId) : null;
 
             if (!$selectedKopdes) {
                 $selectedKopdes = \App\Models\Kopdes::where('status', 'aktif')->first();
@@ -882,7 +882,11 @@
                                     </div>
                                     <div class="flex items-center justify-between pt-2 border-t border-gray-100">
                                         <span class="font-bold text-[#c52228] text-sm">Rp {{ number_format($p->harga, 0, ',', '.') }}</span>
-                                        <button onclick="addItemToCart({{ $p->id_product }})" class="bg-[#c52228] hover:bg-[#a51c21] text-white px-2.5 py-1 rounded text-xs font-semibold shadow-xs cursor-pointer">+ Keranjang</button>
+                                        @if ($p->stok > 0)
+                                            <button onclick="addItemToCart({{ $p->id_product }})" class="bg-[#c52228] hover:bg-[#a51c21] text-white px-2.5 py-1 rounded text-xs font-semibold shadow-xs cursor-pointer">+ Keranjang</button>
+                                        @else
+                                            <button disabled class="bg-gray-100 text-gray-400 px-2.5 py-1 rounded text-xs font-semibold cursor-not-allowed">Stok Habis</button>
+                                        @endif
                                     </div>
                                 </div>
                             @empty
@@ -932,7 +936,11 @@
                                     <span class="text-[10px] text-gray-400 block font-semibold">Harga</span>
                                     <span class="font-bold text-[#c52228] text-sm md:text-base">Rp {{ number_format($p->harga, 0, ',', '.') }}</span>
                                 </div>
-                                <button onclick="addItemToCart({{ $p->id_product }})" class="bg-[#c52228] hover:bg-[#a51c21] text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-xs cursor-pointer">+ Beli</button>
+                                @if ($p->stok > 0)
+                                    <button onclick="addItemToCart({{ $p->id_product }})" class="bg-[#c52228] hover:bg-[#a51c21] text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-xs cursor-pointer">+ Beli</button>
+                                @else
+                                    <button disabled class="bg-gray-100 text-gray-400 px-3 py-1.5 rounded-lg text-xs font-bold cursor-not-allowed">Habis</button>
+                                @endif
                             </div>
                         </div>
                     @empty
@@ -1415,10 +1423,21 @@
 
             const buyBtn = document.getElementById('modal-buy-btn');
             if (buyBtn) {
-                buyBtn.onclick = function() {
-                    addItemToCart(idProduct);
-                    closeDetailModal();
-                };
+                const stockInt = parseInt(stock) || 0;
+                if (stockInt > 0) {
+                    buyBtn.disabled = false;
+                    buyBtn.innerText = '+ Beli';
+                    buyBtn.className = 'w-1/2 bg-[#c52228] text-white font-bold py-2 rounded-xl text-xs md:text-sm shadow-xs cursor-pointer hover:bg-[#a51c21]';
+                    buyBtn.onclick = function() {
+                        addItemToCart(idProduct);
+                        closeDetailModal();
+                    };
+                } else {
+                    buyBtn.disabled = true;
+                    buyBtn.innerText = 'Stok Habis';
+                    buyBtn.className = 'w-1/2 bg-gray-200 text-gray-400 font-bold py-2 rounded-xl text-xs md:text-sm cursor-not-allowed';
+                    buyBtn.onclick = null;
+                }
             }
 
             const modal = document.getElementById('detail-modal');
