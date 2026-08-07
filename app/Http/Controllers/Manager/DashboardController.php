@@ -15,16 +15,23 @@ class DashboardController extends Controller
     {
         $id_kopdes = Auth::user()->id_kopdes ?? 1;
 
-        // Ambil data produk, kategori, dan transaksi milik KopDes ini
         $products = Product::where('id_kopdes', $id_kopdes)->get();
         $categories = Category::where('id_kopdes', $id_kopdes)->get();
         
-        // Mengambil data transaksi (menyesuaikan tabel 'transactions' di database)
-        // Jika belum ada tabel transactions, variabel akan kosong jadi tidak error
-        $transactions = DB::table('transactions')
-            ->where('id_kopdes', $id_kopdes)
-            ->get();
+        $transactions = DB::table('transactions')->get();
 
-        return view('dashboard', compact('products', 'categories', 'transactions', 'id_kopdes'));
+        $salesReport = collect();
+        $totalOmzet = 0;
+        $reviews = collect();
+
+        return view('dashboard', compact(
+            'products', 
+            'categories', 
+            'transactions', 
+            'salesReport', 
+            'totalOmzet', 
+            'reviews', 
+            'id_kopdes'
+        ));
     }
 }

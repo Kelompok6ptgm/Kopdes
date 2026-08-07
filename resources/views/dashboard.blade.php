@@ -44,7 +44,7 @@
         <div class="bg-gradient-to-r from-red-600 to-red-800 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-center">
             <div>
                 <h1 class="text-3xl font-extrabold mb-1">Pusat Kontrol Manager KopDes</h1>
-                <p class="text-red-100 text-sm">Kelola produk, kategori, dan pesanan pelanggan langsung dari satu halaman dashboard.</p>
+                <p class="text-red-100 text-sm">Kelola produk, kategori, pesanan, laporan, dan ulasan pelanggan langsung dari satu halaman dashboard.</p>
             </div>
             <div class="mt-4 md:mt-0 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20 text-center">
                 <span class="block text-xs uppercase tracking-wider text-red-200">Role Akses</span>
@@ -117,9 +117,20 @@
 
             </div>
 
-            <!-- KOLOM KANAN: TABEL KATEGORI, PRODUK, & PESANAN -->
+            <!-- KOLOM KANAN: TABEL KATEGORI, PRODUK, PESANAN, LAPORAN & ULASAN -->
             <div class="lg:col-span-2 space-y-8">
                 
+                <!-- Kartu Ringkasan Omzet / Laporan Penjualan -->
+                <div class="bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl shadow-sm p-6 border border-gray-700 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase tracking-wider font-bold">Total Omzet Penjualan (Selesai)</p>
+                        <h3 class="text-2xl font-extrabold mt-1">Rp {{ number_format($totalOmzet ?? 0, 0, ',', '.') }}</h3>
+                    </div>
+                    <div class="bg-red-600 p-3 rounded-lg text-white">
+                        <i class="fa-solid fa-chart-line text-xl"></i>
+                    </div>
+                </div>
+
                 <!-- Tabel Kategori -->
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
                     <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b flex items-center">
@@ -240,6 +251,39 @@
                                     </tr>
                                 @empty
                                     <tr><td colspan="5" class="px-4 py-4 text-center text-gray-400 italic">Belum ada pesanan masuk.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tabel Ulasan Pelanggan -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b flex items-center">
+                        <i class="fa-solid fa-star text-yellow-500 mr-2"></i> Ulasan & Rating Produk
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-red-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-left font-bold text-red-700">Produk</th>
+                                    <th class="px-4 py-2 text-left font-bold text-red-700">Pelanggan</th>
+                                    <th class="px-4 py-2 text-left font-bold text-red-700">Rating</th>
+                                    <th class="px-4 py-2 text-left font-bold text-red-700">Ulasan</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                @forelse ($reviews ?? [] as $rev)
+                                    <tr>
+                                        <td class="px-4 py-3 font-medium">{{ $rev->nama_produk }}</td>
+                                        <td class="px-4 py-3 text-gray-500">{{ $rev->nama_pelanggan ?? 'Pembeli' }}</td>
+                                        <td class="px-4 py-3 text-yellow-500 font-bold">
+                                            {{ str_repeat('★', $rev->rating ?? 5) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-600 italic">"{{ $rev->komentar ?? $rev->ulasan }}"</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="4" class="px-4 py-4 text-center text-gray-400 italic">Belum ada ulasan dari pelanggan.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
