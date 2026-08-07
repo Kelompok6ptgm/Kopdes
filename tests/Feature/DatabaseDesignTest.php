@@ -38,6 +38,8 @@ class DatabaseDesignTest extends TestCase
         $kopdes = Kopdes::create([
             'nama_kopdes' => 'Kopdes Sukamaju',
             'alamat' => 'Dusun Sukamaju No. 12',
+            'kode_pos' => '12190',
+            'provinsi' => 'DKI Jakarta',
             'no_hp' => '081234567890',
             'status' => 'aktif',
         ]);
@@ -51,6 +53,7 @@ class DatabaseDesignTest extends TestCase
             'email' => 'budi@kopdes.com',
             'password' => Hash::make('password'),
             'no_hp' => '081234567891',
+            'kode_pos' => '12190',
             'alamat' => 'Kantor Koperasi',
         ]);
         $this->assertEquals($kopdes->id_kopdes, $manager->kopdes->id_kopdes);
