@@ -79,7 +79,7 @@ class DatabaseSeeder extends Seeder
             'no_hp' => '081234567890',
             'kode_pos' => '12190',
             'alamat' => 'Kantor Pusat Platform, Jakarta',
-        ]);
+        ]);         
 
         $manager = User::create([
             'id_role' => 2,

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
+
     <title>Dashboard Manager - KopDes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -41,16 +41,37 @@
         </div>
         @endif
 
-        <!-- Banner Selamat Datang -->
-        <div class="bg-gradient-to-r from-red-600 to-red-800 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-extrabold mb-1">Pusat Kontrol Manager KopDes</h1>
-                <p class="text-red-100 text-sm">Kelola produk, kategori, pesanan, laporan, dan ulasan pelanggan langsung dari satu halaman dashboard.</p>
-            </div>
-            <div class="mt-4 md:mt-0 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20 text-center">
-                <span class="block text-xs uppercase tracking-wider text-red-200">Role Akses</span>
-                <span class="font-bold text-yellow-300"><i class="fa-solid fa-user-shield mr-1"></i> MANAGER</span>
-=======
+       <!-- Banner Selamat Datang dengan Gambar -->
+<div class="bg-gradient-to-r from-red-600 to-red-800 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-center relative overflow-hidden">
+    
+    <!-- Bagian Teks Kiri -->
+    <div class="z-10 max-w-xl">
+        <h1 class="text-3xl font-extrabold mb-1">Pusat Kontrol Manager KopDes</h1>
+        <p class="text-red-100 text-sm">Kelola produk, kategori, pesanan, laporan, dan ulasan pelanggan langsung dari satu halaman dashboard.</p>
+    </div>
+
+    <!-- Bagian Role Akses & Gambar Ilustrasi di Kanan -->
+    <div class="z-10 mt-4 md:mt-0 flex items-center space-x-4">
+        <!-- Kotak Role Akses Asli -->
+        <div class="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20 text-center">
+            <span class="block text-xs uppercase tracking-wider text-red-200">Role Akses</span>
+            <span class="font-bold text-yellow-300"><i class="fa-solid fa-user-shield mr-1"></i> MANAGER</span>
+        </div>
+
+        <!-- Tambahan Gambar Banner -->
+        <div class="hidden sm:block">
+            <img src="{{ asset('images/banner-illustration.png') }}" alt="Ilustrasi Banner" class="w-24 h-24 object-contain drop-shadow-md">
+            <!-- 
+               Catatan: 
+               - Kalau mau pakai gambar online/link luar, ganti src="..." jadi URL gambarnya.
+               - Kalau pakai file lokal di public/images, pastikan foldernya sesuai.
+            -->
+        </div>
+    </div>
+
+    <!-- Efek Cahaya Background Biar Makin Estetik -->
+    <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+</div>  
     <title>Dashboard Kopdes</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
