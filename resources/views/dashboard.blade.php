@@ -3,79 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Dashboard Manager - KopDes</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-gray-100 text-gray-800 font-sans">
-
-    <!-- Top Navbar -->
-    <nav class="bg-white border-b-2 border-red-600 shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center space-x-3">
-                    <span class="bg-red-600 text-white font-black px-3 py-1 rounded text-xl">KOPDES</span>
-                    <span class="font-bold text-gray-700 hidden sm:inline">Panel Manager KopDes</span>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-sm font-semibold text-gray-600">Halo, <strong class="text-red-600">{{ Auth::user()->nama ?? 'Manager' }}</strong></span>
-                    <form action="{{ route('logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-4 py-2 rounded-lg shadow transition">
-                            <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        
-        <!-- Notifikasi Sukses -->
-        @if(session('success'))
-        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm" role="alert">
-            <p class="font-bold">Berhasil!</p>
-            <p>{{ session('success') }}</p>
-        </div>
-        @endif
-
-       <!-- Banner Selamat Datang dengan Gambar -->
-<div class="bg-gradient-to-r from-red-600 to-red-800 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-center relative overflow-hidden">
-    
-    <!-- Bagian Teks Kiri -->
-    <div class="z-10 max-w-xl">
-        <h1 class="text-3xl font-extrabold mb-1">Pusat Kontrol Manager KopDes</h1>
-        <p class="text-red-100 text-sm">Kelola produk, kategori, pesanan, laporan, dan ulasan pelanggan langsung dari satu halaman dashboard.</p>
-    </div>
-
-    <!-- Bagian Role Akses & Gambar Ilustrasi di Kanan -->
-    <div class="z-10 mt-4 md:mt-0 flex items-center space-x-4">
-        <!-- Kotak Role Akses Asli -->
-        <div class="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20 text-center">
-            <span class="block text-xs uppercase tracking-wider text-red-200">Role Akses</span>
-            <span class="font-bold text-yellow-300"><i class="fa-solid fa-user-shield mr-1"></i> MANAGER</span>
-        </div>
-
-        <!-- Tambahan Gambar Banner -->
-        <div class="hidden sm:block">
-            <img src="{{ asset('images/banner-illustration.png') }}" alt="Ilustrasi Banner" class="w-24 h-24 object-contain drop-shadow-md">
-            <!-- 
-               Catatan: 
-               - Kalau mau pakai gambar online/link luar, ganti src="..." jadi URL gambarnya.
-               - Kalau pakai file lokal di public/images, pastikan foldernya sesuai.
-            -->
-        </div>
-    </div>
-
-    <!-- Efek Cahaya Background Biar Makin Estetik -->
-    <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-</div>  
     <title>Dashboard Kopdes</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body { font-family: 'Instrument Sans', sans-serif; }
@@ -463,54 +395,139 @@
 
                     <!-- SECTION: PRODUK & STOK -->
                     <section id="mgr-products" class="tab-content hidden space-y-6">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <h3 class="font-bold text-lg md:text-xl text-gray-900">Katalog Produk & Stok</h3>
-                            <button class="bg-[#c52228] hover:bg-[#a51c21] text-white px-4 py-2 rounded-lg text-xs md:text-sm font-semibold shadow-xs cursor-pointer">+ Tambah Produk</button>
-                        </div>
-                        <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-x-auto">
-                            <table class="w-full text-left border-collapse min-w-[600px]">
-                                <thead>
-                                    <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase">
-                                        <th class="p-4">Produk</th>
-                                        <th class="p-4">Kategori</th>
-                                        <th class="p-4">Harga</th>
-                                        <th class="p-4">Stok</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-150 text-sm">
-                                    @forelse ($myProducts as $prod)
-                                        <tr>
-                                            <td class="p-4 font-semibold text-gray-900">{{ $prod->nama_produk }}</td>
-                                            <td class="p-4 text-gray-600">{{ $prod->category->nama_kategori ?? 'Umum' }}</td>
-                                            <td class="p-4 font-semibold">Rp {{ number_format($prod->harga, 0, ',', '.') }}</td>
-                                            <td class="p-4 font-bold text-blue-600">{{ $prod->stok }} pcs</td>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <!-- Left: Form Tambah Produk -->
+                            <div class="bg-white rounded-xl shadow-xs p-6 border border-gray-200 h-fit">
+                                <h3 class="font-bold text-base text-gray-900 mb-4 pb-2 border-b flex items-center">
+                                    <i class="fa-solid fa-box-open text-red-600 mr-2"></i> Tambah Produk
+                                </h3>
+                                <form action="{{ route('manager.products.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                    @csrf
+                                    <div>
+                                        <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Nama Produk</label>
+                                        <input type="text" name="nama_produk" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Kategori</label>
+                                        <select name="id_category" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-white cursor-pointer">
+                                            <option value="">-- Pilih Kategori --</option>
+                                            @foreach ($myCategories as $cat)
+                                                <option value="{{ $cat->id_category }}">{{ $cat->nama_kategori }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Harga (Rp)</label>
+                                            <input type="number" name="harga" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50">
+                                        </div>
+                                        <div>
+                                            <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Stok</label>
+                                            <input type="number" name="stok" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Deskripsi</label>
+                                        <textarea name="deskripsi" rows="2" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Foto Produk</label>
+                                        <input type="file" name="foto" accept="image/*" class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer">
+                                    </div>
+                                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg text-sm shadow transition cursor-pointer border-none">
+                                        Simpan Produk
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Right: Daftar Produk -->
+                            <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-xs overflow-x-auto">
+                                <table class="w-full text-left border-collapse min-w-[600px]">
+                                    <thead>
+                                        <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase">
+                                            <th class="p-4">Produk</th>
+                                            <th class="p-4">Kategori</th>
+                                            <th class="p-4">Harga</th>
+                                            <th class="p-4">Stok</th>
+                                            <th class="p-4 text-right">Aksi</th>
                                         </tr>
-                                    @empty
-                                        <tr><td colspan="4" class="p-8 text-center text-gray-400">Belum ada produk.</td></tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-150 text-sm">
+                                        @forelse ($myProducts as $prod)
+                                            <tr>
+                                                <td class="p-4 font-semibold text-gray-900 flex items-center space-x-3">
+                                                    @if ($prod->gambar)
+                                                        <img src="{{ asset($prod->gambar) }}" alt="Img" class="w-10 h-10 rounded object-cover border">
+                                                    @endif
+                                                    <span>{{ $prod->nama_produk }}</span>
+                                                </td>
+                                                <td class="p-4 text-gray-600">{{ $prod->category->nama_kategori ?? 'Umum' }}</td>
+                                                <td class="p-4 font-semibold">Rp {{ number_format($prod->harga, 0, ',', '.') }}</td>
+                                                <td class="p-4 font-bold text-blue-600">{{ $prod->stok }} pcs</td>
+                                                <td class="p-4 text-right space-x-2">
+                                                    <a href="{{ route('manager.products.edit', $prod->id_product) }}" class="text-blue-600 hover:underline text-xs font-semibold">Edit</a>
+                                                    <form action="{{ route('manager.products.destroy', $prod->id_product) }}" method="POST" class="inline" onsubmit="return confirm('Hapus produk ini?');">
+                                                        @csrf @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:underline text-xs font-semibold cursor-pointer border-none bg-transparent">Hapus</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="5" class="p-8 text-center text-gray-400">Belum ada produk.</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </section>
 
                     <!-- SECTION: KATEGORI PRODUK -->
                     <section id="mgr-categories" class="tab-content hidden space-y-6">
-                        <h3 class="font-bold text-lg md:text-xl text-gray-900">Kelola Kategori Produk</h3>
-                        <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-x-auto max-w-md">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase">
-                                        <th class="p-4">Kategori</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-150 text-sm">
-                                    @forelse ($myCategories as $cat)
-                                        <tr><td class="p-4 font-semibold text-gray-900">{{ $cat->nama_kategori }}</td></tr>
-                                    @empty
-                                        <tr><td class="p-8 text-center text-gray-400">Belum ada kategori.</td></tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Left: Form Tambah Kategori -->
+                            <div class="bg-white rounded-xl shadow-xs p-6 border border-gray-200 h-fit">
+                                <h3 class="font-bold text-base text-gray-900 mb-4 pb-2 border-b flex items-center">
+                                    <i class="fa-solid fa-tags text-red-600 mr-2"></i> Tambah Kategori
+                                </h3>
+                                <form action="{{ route('manager.categories.store') }}" method="POST">
+                                    @csrf
+                                    <div class="mb-4">
+                                        <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Nama Kategori</label>
+                                        <input type="text" name="nama_kategori" required placeholder="Contoh: Sembako" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50">
+                                    </div>
+                                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg text-sm shadow transition cursor-pointer border-none">
+                                        Simpan Kategori
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <!-- Right: Daftar Kategori -->
+                            <div class="md:col-span-2 bg-white rounded-xl border border-gray-200 shadow-xs overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase">
+                                            <th class="p-4">Kategori</th>
+                                            <th class="p-4 text-right">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-150 text-sm">
+                                        @forelse ($myCategories as $cat)
+                                            <tr>
+                                                <td class="p-4 font-semibold text-gray-900">{{ $cat->nama_kategori }}</td>
+                                                <td class="p-4 text-right space-x-2">
+                                                    <a href="{{ route('manager.categories.edit', $cat->id_category) }}" class="text-blue-600 hover:underline text-xs font-semibold">Edit</a>
+                                                    <form action="{{ route('manager.categories.destroy', $cat->id_category) }}" method="POST" class="inline" onsubmit="return confirm('Hapus kategori ini?');">
+                                                        @csrf @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:underline text-xs font-semibold cursor-pointer border-none bg-transparent">Hapus</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="2" class="p-8 text-center text-gray-400">Belum ada kategori.</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </section>
 
@@ -871,10 +888,8 @@
                         <!-- Mobile Hamburger Button -->
                         <button onclick="toggleUserMobileMenu()" class="md:hidden p-2 text-gray-600 hover:text-gray-900 focus:outline-none">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                        </button>
                     </div>
                 </div>
->>>>>>> 15db2764b4b4d33a4a57b7752454984bf23d7a7b
             </div>
 
             <!-- Responsive Mobile Drawer for User -->
@@ -1272,252 +1287,6 @@
             </div>
         </div>
 
-<<<<<<< HEAD
-        <!-- GRID UTAMA: KONTEN CRUD & TRANSAKSI -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <!-- KOLOM KIRI: FORM TAMBAH KATEGORI & PRODUK -->
-            <div class="space-y-8">
-                
-                <!-- Form Tambah Kategori -->
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b flex items-center">
-                        <i class="fa-solid fa-tags text-red-600 mr-2"></i> Tambah Kategori Baru
-                    </h2>
-                    <form action="{{ route('manager.categories.store') }}" method="POST">
-                        @csrf
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Nama Kategori</label>
-                            <input type="text" name="nama_kategori" required placeholder="Contoh: Sembako, Pupuk" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500">
-                        </div>
-                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg text-sm shadow transition">
-                            Simpan Kategori
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Form Tambah Produk -->
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b flex items-center">
-                        <i class="fa-solid fa-box-open text-red-600 mr-2"></i> Tambah Produk Baru
-                    </h2>
-                    <form action="{{ route('manager.products.store') }}" method="POST" class="space-y-4">
-                        @csrf
-                        <div>
-                            <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Nama Produk</label>
-                            <input type="text" name="nama_produk" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Kategori</label>
-                            <select name="id_category" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500">
-                                <option value="">-- Pilih Kategori --</option>
-                                @foreach ($categories as $cat)
-                                    <option value="{{ $cat->id_category }}">{{ $cat->nama_kategori }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Harga (Rp)</label>
-                                <input type="number" name="harga" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500">
-                            </div>
-                            <div>
-                                <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Stok</label>
-                                <input type="number" name="stok" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Deskripsi</label>
-                            <textarea name="deskripsi" rows="2" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500"></textarea>
-                        </div>
-                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg text-sm shadow transition">
-                            Simpan Produk
-                        </button>
-                    </form>
-                </div>
-
-            </div>
-
-            <!-- KOLOM KANAN: TABEL KATEGORI, PRODUK, PESANAN, LAPORAN & ULASAN -->
-            <div class="lg:col-span-2 space-y-8">
-                
-                <!-- Kartu Ringkasan Omzet / Laporan Penjualan -->
-                <div class="bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl shadow-sm p-6 border border-gray-700 flex justify-between items-center">
-                    <div>
-                        <p class="text-xs text-gray-400 uppercase tracking-wider font-bold">Total Omzet Penjualan (Selesai)</p>
-                        <h3 class="text-2xl font-extrabold mt-1">Rp {{ number_format($totalOmzet ?? 0, 0, ',', '.') }}</h3>
-                    </div>
-                    <div class="bg-red-600 p-3 rounded-lg text-white">
-                        <i class="fa-solid fa-chart-line text-xl"></i>
-                    </div>
-                </div>
-
-                <!-- Tabel Kategori -->
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b flex items-center">
-                        <i class="fa-solid fa-list text-red-600 mr-2"></i> Daftar Kategori KopDes
-                    </h2>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-red-50">
-                                <tr>
-                                    <th class="px-4 py-2 text-left font-bold text-red-700">Nama Kategori</th>
-                                    <th class="px-4 py-2 text-center font-bold text-red-700 w-32">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                @forelse ($categories as $cat)
-                                    <tr>
-                                        <td class="px-4 py-3 font-medium">{{ $cat->nama_kategori }}</td>
-                                        <td class="px-4 py-3 text-center space-x-2">
-                                            <a href="{{ route('manager.categories.edit', $cat->id_category) }}" class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded">Edit</a>
-                                            <form action="{{ route('manager.categories.destroy', $cat->id_category) }}" method="POST" class="inline" onsubmit="return confirm('Hapus kategori ini?');">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:bg-red-50 px-2 py-1 rounded">Hapus</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="2" class="px-4 py-4 text-center text-gray-400 italic">Belum ada kategori.</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Tabel Produk -->
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b flex items-center">
-                        <i class="fa-solid fa-boxes-stacked text-red-600 mr-2"></i> Daftar Produk KopDes
-                    </h2>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-red-50">
-                                <tr>
-                                    <th class="px-4 py-2 text-left font-bold text-red-700">Nama Produk</th>
-                                    <th class="px-4 py-2 text-left font-bold text-red-700">Kategori</th>
-                                    <th class="px-4 py-2 text-left font-bold text-red-700">Harga</th>
-                                    <th class="px-4 py-2 text-left font-bold text-red-700">Stok</th>
-                                    <th class="px-4 py-2 text-center font-bold text-red-700 w-32">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                @forelse ($products as $item)
-                                    <tr>
-                                        <td class="px-4 py-3 font-medium">{{ $item->nama_produk }}</td>
-                                        <td class="px-4 py-3 text-gray-500">{{ $item->category->nama_kategori ?? '-' }}</td>
-                                        <td class="px-4 py-3 text-gray-500">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 text-gray-500">{{ $item->stok }}</td>
-                                        <td class="px-4 py-3 text-center space-x-2">
-                                            <a href="{{ route('manager.products.edit', $item->id) }}" class="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded">Edit</a>
-                                            <form action="{{ route('manager.products.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('Hapus produk ini?');">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:bg-red-50 px-2 py-1 rounded">Hapus</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="5" class="px-4 py-4 text-center text-gray-400 italic">Belum ada produk.</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Tabel Pesanan & Verifikasi Pembayaran -->
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b flex items-center">
-                        <i class="fa-solid fa-receipt text-red-600 mr-2"></i> Kelola Pesanan & Pembayaran
-                    </h2>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-red-50">
-                                <tr>
-                                    <th class="px-4 py-2 text-left font-bold text-red-700">ID / Pelanggan</th>
-                                    <th class="px-4 py-2 text-left font-bold text-red-700">Total</th>
-                                    <th class="px-4 py-2 text-left font-bold text-red-700">Status Pembayaran</th>
-                                    <th class="px-4 py-2 text-left font-bold text-red-700">Status Pesanan</th>
-                                    <th class="px-4 py-2 text-center font-bold text-red-700 w-48">Aksi / Ubah Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                @forelse ($transactions ?? [] as $trx)
-                                    <tr>
-                                        <td class="px-4 py-3 font-medium">
-                                            #{{ $trx->id }} <br>
-                                            <span class="text-xs text-gray-400">{{ $trx->nama_pelanggan ?? 'Pelanggan' }}</span>
-                                        </td>
-                                        <td class="px-4 py-3 text-gray-500">Rp {{ number_format($trx->total_harga ?? 0, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3">
-                                            <span class="px-2 py-1 text-xs font-bold rounded {{ ($trx->status_pembayaran ?? '') == 'Verified' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
-                                                {{ $trx->status_pembayaran ?? 'Menunggu' }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            <span class="px-2 py-1 text-xs font-bold rounded bg-blue-100 text-blue-700">
-                                                {{ $trx->status ?? 'Diproses' }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3 text-center">
-                                            <form action="{{ route('manager.transactions.updateStatus', $trx->id) }}" method="POST" class="flex items-center space-x-1">
-                                                @csrf @method('PUT')
-                                                <select name="status" class="border rounded text-xs px-2 py-1 focus:outline-none">
-                                                    <option value="Diproses" {{ ($trx->status ?? '') == 'Diproses' ? 'selected' : '' }}>Diproses</option>
-                                                    <option value="Dikirim" {{ ($trx->status ?? '') == 'Dikirim' ? 'selected' : '' }}>Dikirim</option>
-                                                    <option value="Selesai" {{ ($trx->status ?? '') == 'Selesai' ? 'selected' : '' }}>Selesai</option>
-                                                </select>
-                                                <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">Update</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="5" class="px-4 py-4 text-center text-gray-400 italic">Belum ada pesanan masuk.</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Tabel Ulasan Pelanggan -->
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b flex items-center">
-                        <i class="fa-solid fa-star text-yellow-500 mr-2"></i> Ulasan & Rating Produk
-                    </h2>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-red-50">
-                                <tr>
-                                    <th class="px-4 py-2 text-left font-bold text-red-700">Produk</th>
-                                    <th class="px-4 py-2 text-left font-bold text-red-700">Pelanggan</th>
-                                    <th class="px-4 py-2 text-left font-bold text-red-700">Rating</th>
-                                    <th class="px-4 py-2 text-left font-bold text-red-700">Ulasan</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                @forelse ($reviews ?? [] as $rev)
-                                    <tr>
-                                        <td class="px-4 py-3 font-medium">{{ $rev->nama_produk }}</td>
-                                        <td class="px-4 py-3 text-gray-500">{{ $rev->nama_pelanggan ?? 'Pembeli' }}</td>
-                                        <td class="px-4 py-3 text-yellow-500 font-bold">
-                                            {{ str_repeat('★', $rev->rating ?? 5) }}
-                                        </td>
-                                        <td class="px-4 py-3 text-gray-600 italic">"{{ $rev->komentar ?? $rev->ulasan }}"</td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="4" class="px-4 py-4 text-center text-gray-400 italic">Belum ada ulasan dari pelanggan.</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-=======
         <!-- Checkout Modal -->
         <div id="checkout-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4">
             <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
@@ -1674,43 +1443,24 @@
         }
 
         function switchTabTop(tabId) {
-            // 1. Instantly hide all section contents
+            // 1. Hide all sections
             document.querySelectorAll('.tab-content-top').forEach(c => c.classList.add('hidden'));
 
-            // 2. Instantly show target section content
+            // 2. Show target section
             const target = document.getElementById(tabId);
-            if (target) {
-                target.classList.remove('hidden');
-            }
+            if (target) target.classList.remove('hidden');
 
-            // 3. Highlight text and slide active indicator smoothly
-            const btnCatalog = document.getElementById('nav-btn-user-catalog');
-            const btnProducts = document.getElementById('nav-btn-user-products');
-            const btnHistory = document.getElementById('nav-btn-user-history');
+            // 3. Update active nav button & slide indicator
+            document.querySelectorAll('.nav-tab-item').forEach(btn => {
+                btn.classList.remove('text-gray-900', 'font-bold');
+                btn.classList.add('text-gray-500', 'font-semibold');
+            });
 
-            let activeEl = null;
-
-            if (btnCatalog && btnProducts && btnHistory) {
-                [btnCatalog, btnProducts, btnHistory].forEach(el => {
-                    el.classList.remove('text-gray-900', 'font-bold');
-                    el.classList.add('text-gray-500', 'font-semibold');
-                });
-
-                if (tabId === 'user-catalog' && btnCatalog) {
-                    btnCatalog.classList.remove('text-gray-500', 'font-semibold');
-                    btnCatalog.classList.add('text-gray-900', 'font-bold');
-                    activeEl = btnCatalog;
-                } else if (tabId === 'user-products' && btnProducts) {
-                    btnProducts.classList.remove('text-gray-500', 'font-semibold');
-                    btnProducts.classList.add('text-gray-900', 'font-bold');
-                    activeEl = btnProducts;
-                } else if (tabId === 'user-history' && btnHistory) {
-                    btnHistory.classList.remove('text-gray-500', 'font-semibold');
-                    btnHistory.classList.add('text-gray-900', 'font-bold');
-                    activeEl = btnHistory;
-                }
-
-                moveNavIndicator(activeEl);
+            const activeBtn = document.getElementById('nav-btn-' + tabId);
+            if (activeBtn) {
+                activeBtn.classList.add('text-gray-900', 'font-bold');
+                activeBtn.classList.remove('text-gray-500', 'font-semibold');
+                moveNavIndicator(activeBtn);
             }
 
             if (window.history && window.history.pushState) {
@@ -2043,6 +1793,5 @@
             }
         }
     </script>
->>>>>>> 15db2764b4b4d33a4a57b7752454984bf23d7a7b
 </body>
 </html>

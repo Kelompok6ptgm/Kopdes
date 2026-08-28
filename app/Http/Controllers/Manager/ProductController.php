@@ -34,7 +34,7 @@ class ProductController extends Controller
             $file = $request->file('foto');
             $filename = time() . '_' . $file->getClientOriginalName();
             $file->move(public_path('uploads/products'), $filename);
-            $product->foto = $filename;
+            $product->gambar = 'uploads/products/' . $filename;
         }
 
         $product->save();
@@ -44,10 +44,10 @@ class ProductController extends Controller
 
     public function destroy($id)
     {
-        $product = Product::findOrFail();
+        $product = Product::findOrFail($id);
         
-        if ($product->foto && file_exists(public_path('uploads/products/' . $product->foto))) {
-            unlink(public_path('uploads/products/' . $product->foto));
+        if ($product->gambar && file_exists(public_path($product->gambar))) {
+            unlink(public_path($product->gambar));
         }
         
         $product->delete();
