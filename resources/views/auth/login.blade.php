@@ -95,7 +95,7 @@
                             </svg>
                             Kata Sandi
                         </label>
-                        <a href="#" class="text-xs text-[#c52228] font-bold hover:underline">Lupa Password?</a>
+                        <button type="button" onclick="openForgotPasswordModal()" class="text-xs text-[#c52228] font-bold hover:underline cursor-pointer">Lupa Password?</button>
                     </div>
                     <div class="relative">
                         <input type="password" id="password" name="password" placeholder="******" required
@@ -153,6 +153,37 @@
         </div>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative animate-fade-in">
+            <button onclick="closeForgotPasswordModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg font-bold">✕</button>
+            <div>
+                <h3 class="text-lg md:text-xl font-bold text-gray-900">Ajukan Reset Password</h3>
+                <p class="text-xs text-gray-500 mt-1">Masukkan Email atau Nomor HP Anda. Pengajuan reset password akan dikirim langsung ke Dashboard Manager Koperasi Anda.</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="fp-identifier" class="block text-xs font-bold text-gray-600 uppercase mb-1">Email / Nomor HP</label>
+                    <input type="text" id="fp-identifier" placeholder="Contoh: johndoe@gmail.com" class="w-full px-4 py-2 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-red-500 bg-gray-50">
+                </div>
+                <button onclick="submitResetRequest()" id="fp-lookup-btn" class="w-full bg-[#c52228] hover:bg-[#a51c21] text-white py-2 rounded-xl text-xs font-bold shadow-xs transition-all flex items-center justify-center cursor-pointer">
+                    Kirim Pengajuan Reset
+                </button>
+            </div>
+
+            <!-- Success Notification Area -->
+            <div id="fp-result-area" class="hidden p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-100 space-y-2 text-xs md:text-sm">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="font-bold text-sm">Pengajuan Terkirim!</span>
+                </div>
+                <p id="fp-success-msg" class="leading-relaxed"></p>
+            </div>
+            <div id="fp-error-area" class="hidden p-3 bg-red-50 text-red-700 rounded-xl border border-red-100 text-xs text-center font-semibold"></div>
+        </div>
+    </div>
+
     <script>
         function togglePasswordVisibility() {
             const passwordInput = document.getElementById('password');
@@ -168,6 +199,65 @@
                 eyeOpen.classList.add('hidden');
                 eyeClosed.classList.remove('hidden');
             }
+        }
+
+        function openForgotPasswordModal() {
+            document.getElementById('forgot-password-modal').classList.remove('hidden');
+            document.getElementById('forgot-password-modal').classList.add('flex');
+            document.getElementById('fp-identifier').value = '';
+            document.getElementById('fp-result-area').classList.add('hidden');
+            document.getElementById('fp-error-area').classList.add('hidden');
+        }
+
+        function closeForgotPasswordModal() {
+            document.getElementById('forgot-password-modal').classList.add('hidden');
+            document.getElementById('forgot-password-modal').classList.remove('flex');
+        }
+
+        function submitResetRequest() {
+            const identifier = document.getElementById('fp-identifier').value.trim();
+            const btn = document.getElementById('fp-lookup-btn');
+            const errorArea = document.getElementById('fp-error-area');
+            const resultArea = document.getElementById('fp-result-area');
+
+            if (!identifier) {
+                errorArea.innerText = 'Harap isi pengenal akun!';
+                errorArea.classList.remove('hidden');
+                return;
+            }
+
+            errorArea.classList.add('hidden');
+            resultArea.classList.add('hidden');
+            btn.disabled = true;
+            btn.innerText = 'Mengirim...';
+
+            fetch('{{ route("forgot-password") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ identifier: identifier })
+            })
+            .then(response => response.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerText = 'Kirim Pengajuan Reset';
+
+                if (data.success) {
+                    document.getElementById('fp-success-msg').innerText = data.message;
+                    resultArea.classList.remove('hidden');
+                } else {
+                    errorArea.innerText = data.message || 'Gagal mengirim pengajuan reset.';
+                    errorArea.classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                btn.disabled = false;
+                btn.innerText = 'Kirim Pengajuan Reset';
+                errorArea.innerText = 'Terjadi kesalahan sistem.';
+                errorArea.classList.remove('hidden');
+            });
         }
     </script>
 </body>

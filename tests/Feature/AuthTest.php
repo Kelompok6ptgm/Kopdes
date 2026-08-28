@@ -44,7 +44,7 @@ class AuthTest extends TestCase
             'nama' => 'Budi Santoso',
             'email' => 'budi@example.com',
             'no_hp' => '08123456789',
-            'alamat' => 'Jl. Mawar No. 12',
+            'kode_pos' => '12190',
             'password' => 'password123',
         ]);
 
@@ -67,7 +67,6 @@ class AuthTest extends TestCase
             'password' => Hash::make('password123'),
             'no_hp' => '08123456789',
             'alamat' => 'Jl. Mawar No. 12',
-            'status' => 'aktif',
         ]);
 
         $response = $this->post('/login', [
@@ -88,7 +87,6 @@ class AuthTest extends TestCase
             'password' => Hash::make('password123'),
             'no_hp' => '08123456789',
             'alamat' => 'Jl. Mawar No. 12',
-            'status' => 'aktif',
         ]);
 
         $response = $this->post('/login', [
@@ -115,7 +113,6 @@ class AuthTest extends TestCase
             'password' => Hash::make('password123'),
             'no_hp' => '08123456789',
             'alamat' => 'Jl. Mawar No. 12',
-            'status' => 'aktif',
         ]);
 
         $response = $this->actingAs($user)->post('/logout');

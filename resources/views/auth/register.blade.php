@@ -90,15 +90,16 @@
                         class="w-full px-4 py-3 bg-[#f0f4f8] border border-transparent rounded-lg text-sm focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all placeholder-gray-400">
                 </div>
 
-                <!-- Alamat -->
+                <!-- Kode Pos -->
                 <div>
-                    <label for="alamat" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                    <label for="kode_pos" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                         <svg class="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
-                        Alamat
+                        Kode Pos (Area/Provinsi)
                     </label>
-                    <input type="text" id="alamat" name="alamat" value="{{ old('alamat') }}" placeholder="Contoh: Jl. Merdeka 123" required
+                    <input type="text" id="kode_pos" name="kode_pos" value="{{ old('kode_pos') }}" placeholder="Contoh: 12190" required
                         class="w-full px-4 py-3 bg-[#f0f4f8] border border-transparent rounded-lg text-sm focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all placeholder-gray-400">
                 </div>
 
