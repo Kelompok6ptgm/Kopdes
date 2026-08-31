@@ -359,23 +359,24 @@
             <!-- Main Panel -->
             <main class="flex-1 ml-0 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 w-full overflow-x-hidden">
                 @if (!$hasKopdes)
-                    <div class="bg-yellow-50 text-yellow-800 p-6 rounded-xl border border-yellow-100 shadow-xs">
+                    <div class="bg-yellow-50 text-yellow-800 p-6 rounded-xl border border-yellow-100 shadow-xs mb-8">
                         <h2 class="font-bold text-lg">Penempatan KopDes Belum Ditugaskan</h2>
                         <p class="text-xs md:text-sm mt-1">Anda belum ditugaskan untuk mengelola Koperasi Desa manapun oleh Administrator.</p>
                     </div>
-                @else
-                    <!-- Header -->
-                    <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-gray-200 mb-8 gap-4">
-                        <div>
-                            <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ $kopdes->nama_kopdes }}</h1>
-                            <p class="text-xs md:text-sm text-gray-500">Alamat: {{ $kopdes->alamat }} (Kode Pos: {{ $kopdes->kode_pos ?? '-' }})</p>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full">Manager: {{ $user->nama }}</span>
-                        </div>
-                    </header>
+                @endif
 
-                    <!-- SECTION: OVERVIEW -->
+                <!-- Header -->
+                <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-gray-200 mb-8 gap-4">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ $kopdes->nama_kopdes ?? 'Manager' }}</h1>
+                        <p class="text-xs md:text-sm text-gray-500">Alamat: {{ $kopdes->alamat ?? '-' }} (Kode Pos: {{ $kopdes->kode_pos ?? '-' }})</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full">Manager: {{ $user->nama }}</span>
+                    </div>
+                </header>
+
+                <!-- SECTION: OVERVIEW -->
                     <section id="mgr-overview" class="tab-content space-y-8">
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
                             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
@@ -751,7 +752,7 @@
                                             <td class="p-4 text-gray-600">{{ $mb->kode_pos }}</td>
                                             <td class="p-4">
                                                 @if ($mb->reset_requested)
-                                                    <form action="{{ route('manager.reset-password', $mb->id_user) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui reset password anggota ini menjadi kopdes123?')" class="inline">
+                                                    <form action="{{ route('manager.member.reset-password', $mb->id_user) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui reset password anggota ini menjadi kopdes123?')" class="inline">
                                                         @csrf
                                                         <button type="submit" class="bg-[#c52228] hover:bg-[#a51c21] text-white shadow-xs px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer">
                                                             Setujui Reset
@@ -771,7 +772,6 @@
                             </table>
                         </div>
                     </section>
-                @endif
             </main>
         </div>
     @endif
@@ -1139,7 +1139,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-150 text-sm">
                             @forelse ($myHistory as $h)
-                                <tr>
+                                <tr class="hover:bg-gray-50/50">
                                     <td class="p-4 font-semibold text-gray-900">{{ $h->kode_transaksi }}</td>
                                     <td class="p-4 text-gray-600">{{ $h->kopdes->nama_kopdes ?? 'N/A' }}</td>
                                     <td class="p-4 font-bold text-gray-900">Rp {{ number_format($h->total_harga, 0, ',', '.') }}</td>
@@ -1150,19 +1150,27 @@
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 uppercase">Menunggu Verifikasi</span>
                                         @elseif ($h->status_transaksi === 'diproses')
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 uppercase">Diproses</span>
+                                        @elseif ($h->status_transaksi === 'dikirim')
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200 uppercase">Dikirim</span>
                                         @elseif ($h->status_transaksi === 'dibatalkan')
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200 uppercase">Dibatalkan</span>
                                         @else
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200 uppercase">{{ $h->status_transaksi }}</span>
                                         @endif
                                     </td>
-                                    <td class="p-4 text-right space-x-2">
+                                    <td class="p-4 text-right space-x-2 whitespace-nowrap">
+                                        {{-- Tombol Detail: toggle expand row --}}
+                                        <button onclick="toggleTrxDetail('trx-detail-{{ $h->id_transaction }}')"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer">
+                                            Detail ▾
+                                        </button>
+
                                         @if ($h->status_transaksi === 'menunggu_pembayaran')
                                             <button onclick="openPaymentModal({{ $h->id_transaction }}, '{{ number_format($h->total_harga, 0, ',', '.') }}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer">
                                                 Bayar
                                             </button>
                                         @endif
-                                        
+
                                         @if ($h->status_transaksi === 'menunggu_pembayaran' || $h->status_transaksi === 'menunggu_verifikasi')
                                             <form action="{{ route('transaction.cancel', $h->id_transaction) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini? Stok akan dikembalikan.')">
                                                 @csrf
@@ -1179,6 +1187,71 @@
                                         @endif
                                     </td>
                                 </tr>
+                                {{-- Expandable Detail Row --}}
+                                <tr id="trx-detail-{{ $h->id_transaction }}" class="hidden bg-gray-50/70">
+                                    <td colspan="5" class="px-6 py-4 border-t border-dashed border-gray-200">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {{-- Daftar Barang --}}
+                                            <div>
+                                                <h5 class="text-xs font-bold text-gray-500 uppercase mb-3">Barang yang Dibeli</h5>
+                                                <div class="space-y-2">
+                                                    @foreach ($h->details as $d)
+                                                        <div class="flex items-center justify-between bg-white rounded-lg border border-gray-100 p-3">
+                                                            <div class="flex items-center space-x-3">
+                                                                <div class="w-8 h-8 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                                    @if ($d->product->gambar)
+                                                                        <img src="{{ asset($d->product->gambar) }}" alt="" class="w-full h-full object-cover">
+                                                                    @else
+                                                                        <div class="w-full h-full flex items-center justify-center text-gray-400 text-[10px] font-bold">{{ substr($d->product->nama_produk, 0, 2) }}</div>
+                                                                    @endif
+                                                                </div>
+                                                                <div>
+                                                                    <p class="text-xs font-semibold text-gray-900">{{ $d->product->nama_produk }}</p>
+                                                                    <p class="text-[10px] text-gray-400">{{ $d->quantity }} × Rp {{ number_format($d->harga_beli, 0, ',', '.') }}</p>
+                                                                </div>
+                                                            </div>
+                                                            <span class="text-xs font-bold text-gray-800">Rp {{ number_format($d->harga_beli * $d->quantity, 0, ',', '.') }}</span>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                            {{-- Info Pengiriman --}}
+                                            <div class="space-y-3">
+                                                <h5 class="text-xs font-bold text-gray-500 uppercase">Info Pesanan</h5>
+                                                <div class="bg-white rounded-lg border border-gray-100 p-4 space-y-2 text-xs">
+                                                    <div class="flex justify-between">
+                                                        <span class="text-gray-500">Kode Transaksi</span>
+                                                        <span class="font-bold text-gray-900">{{ $h->kode_transaksi }}</span>
+                                                    </div>
+                                                    <div class="flex justify-between">
+                                                        <span class="text-gray-500">Tanggal Order</span>
+                                                        <span class="font-semibold text-gray-700">{{ $h->created_at->format('d M Y, H:i') }}</span>
+                                                    </div>
+                                                    <div class="flex justify-between">
+                                                        <span class="text-gray-500">Total Bayar</span>
+                                                        <span class="font-bold text-[#c52228]">Rp {{ number_format($h->total_harga, 0, ',', '.') }}</span>
+                                                    </div>
+                                                    @if ($h->payment)
+                                                        <div class="flex justify-between">
+                                                            <span class="text-gray-500">Metode</span>
+                                                            <span class="font-semibold text-gray-700 uppercase">{{ $h->payment->metode_pembayaran }}</span>
+                                                        </div>
+                                                    @endif
+                                                    <div class="pt-2 border-t border-gray-100">
+                                                        <span class="text-gray-500 block mb-1">Alamat Pengiriman</span>
+                                                        <span class="text-gray-700 font-semibold">{{ $h->alamat_pengiriman }}</span>
+                                                    </div>
+                                                    @if ($h->catatan)
+                                                        <div>
+                                                            <span class="text-gray-500 block mb-1">Catatan</span>
+                                                            <span class="text-gray-700 italic">{{ $h->catatan }}</span>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
                             @empty
                                 <tr><td colspan="5" class="p-8 text-center text-gray-400 text-sm">Belum ada riwayat belanja.</td></tr>
                             @endforelse
@@ -1186,6 +1259,7 @@
                     </table>
                 </div>
             </section>
+
 
             <!-- SECTION 5: PROFIL SAYA -->
             @if ($user)
@@ -1790,6 +1864,19 @@
                     img.classList.add('hidden');
                     fallback.classList.remove('hidden');
                 }
+            }
+        }
+
+        function toggleTrxDetail(rowId) {
+            const row = document.getElementById(rowId);
+            if (!row) return;
+            row.classList.toggle('hidden');
+            // Update button label ▾/▴
+            const btn = event.currentTarget;
+            if (row.classList.contains('hidden')) {
+                btn.textContent = 'Detail ▾';
+            } else {
+                btn.textContent = 'Detail ▴';
             }
         }
     </script>
