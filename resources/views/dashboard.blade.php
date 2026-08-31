@@ -359,23 +359,24 @@
             <!-- Main Panel -->
             <main class="flex-1 ml-0 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 w-full overflow-x-hidden">
                 @if (!$hasKopdes)
-                    <div class="bg-yellow-50 text-yellow-800 p-6 rounded-xl border border-yellow-100 shadow-xs">
+                    <div class="bg-yellow-50 text-yellow-800 p-6 rounded-xl border border-yellow-100 shadow-xs mb-8">
                         <h2 class="font-bold text-lg">Penempatan KopDes Belum Ditugaskan</h2>
                         <p class="text-xs md:text-sm mt-1">Anda belum ditugaskan untuk mengelola Koperasi Desa manapun oleh Administrator.</p>
                     </div>
-                @else
-                    <!-- Header -->
-                    <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-gray-200 mb-8 gap-4">
-                        <div>
-                            <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ $kopdes->nama_kopdes }}</h1>
-                            <p class="text-xs md:text-sm text-gray-500">Alamat: {{ $kopdes->alamat }} (Kode Pos: {{ $kopdes->kode_pos ?? '-' }})</p>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full">Manager: {{ $user->nama }}</span>
-                        </div>
-                    </header>
+                @endif
 
-                    <!-- SECTION: OVERVIEW -->
+                <!-- Header -->
+                <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-gray-200 mb-8 gap-4">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ $kopdes->nama_kopdes ?? 'Manager' }}</h1>
+                        <p class="text-xs md:text-sm text-gray-500">Alamat: {{ $kopdes->alamat ?? '-' }} (Kode Pos: {{ $kopdes->kode_pos ?? '-' }})</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full">Manager: {{ $user->nama }}</span>
+                    </div>
+                </header>
+
+                <!-- SECTION: OVERVIEW -->
                     <section id="mgr-overview" class="tab-content space-y-8">
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
                             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
@@ -771,7 +772,6 @@
                             </table>
                         </div>
                     </section>
-                @endif
             </main>
         </div>
     @endif
