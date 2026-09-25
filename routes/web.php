@@ -3,13 +3,18 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KopdesController;
 use App\Http\Controllers\ManagerController;
-use App\Models\Kopdes;
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Manager\ProductController;
 use App\Http\Controllers\Manager\CategoryController;
 use App\Http\Controllers\Manager\DashboardController;
+<<<<<<< HEAD
+=======
+use App\Http\Controllers\Manager\TransactionController as ManagerTransactionController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\CartController;
+>>>>>>> d72f06bcac955d276cdadab832b07b4e48220044
 
+// ─── Guest-only ───────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
@@ -18,7 +23,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/forgot-password', [AuthController::class, 'forgotPasswordLookup'])->name('forgot-password');
 });
 
-// Guest landing page - can browse products and use session cart
+// ─── Public ────────────────────────────────────────────────────────────────────
 Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('dashboard');
@@ -30,51 +35,60 @@ Route::get('/products', function () {
     return redirect()->to('/#user-products');
 })->name('products.index');
 
-// Guest & Auth Cart operations
-Route::post('/cart/add', [\App\Http\Controllers\CartController::class, 'addToCart'])->name('cart.add');
-Route::post('/cart/update', [\App\Http\Controllers\CartController::class, 'updateCart'])->name('cart.update');
-Route::post('/cart/remove', [\App\Http\Controllers\CartController::class, 'removeFromCart'])->name('cart.remove');
+// Cart: accessible by guests (session) and members (DB)
+Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
+Route::post('/cart/update', [CartController::class, 'updateCart'])->name('cart.update');
+Route::post('/cart/remove', [CartController::class, 'removeFromCart'])->name('cart.remove');
 
+// ─── Authenticated ─────────────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // KopDes CRUD resource
-    Route::resource('admin/kopdes', KopdesController::class)->names([
-        'index' => 'admin.kopdes',
-    ]);
+    // ── Admin: KopDes & Manager CRUD ──────────────────────────────────────────
+    Route::resource('admin/kopdes', KopdesController::class)->names(['index' => 'admin.kopdes']);
+    Route::resource('admin/manager', ManagerController::class)->names(['index' => 'admin.manager']);
+    Route::post('admin/manager/{id}/reset-password', [ManagerController::class, 'resetPassword'])->name('admin.manager.reset-password');
 
-    // Manager CRUD resource
-    Route::resource('admin/manager', ManagerController::class)->names([
-        'index' => 'admin.manager',
-    ]);
-    Route::post('admin/manager/{id}/reset-password', [ManagerController::class, 'resetPassword'])->name('manager.reset-password');
-
-    Route::view('/admin/transaksi', 'admin.transaksi')->name('admin.transaksi');
-    Route::view('/admin/pembayaran', 'admin.pembayaran')->name('admin.pembayaran');
-    Route::view('/admin/laporan', 'admin.laporan')->name('admin.laporan');
-    
-    // Member & Manager actions
-    Route::post('/manager/members/{id}/reset-password', [AuthController::class, 'resetMemberPassword'])->name('manager.reset-password');
-    Route::post('/checkout', [\App\Http\Controllers\TransactionController::class, 'checkout'])->name('checkout');
-    Route::post('/transaction/{id}/pay', [\App\Http\Controllers\TransactionController::class, 'uploadPayment'])->name('transaction.pay');
-    Route::post('/transaction/{id}/cancel', [\App\Http\Controllers\TransactionController::class, 'cancelTransaction'])->name('transaction.cancel');
-    Route::post('/manager/payments/{id}/verify', [\App\Http\Controllers\TransactionController::class, 'verifyPayment'])->name('manager.payments.verify');
-    Route::post('/manager/transactions/{id}/status', [\App\Http\Controllers\TransactionController::class, 'updateStatus'])->name('manager.transactions.status');
-    Route::post('/review', [\App\Http\Controllers\TransactionController::class, 'storeReview'])->name('review.store');
-    Route::post('/review/{id}/reply', [\App\Http\Controllers\TransactionController::class, 'replyReview'])->name('review.reply');
+    // ── Profile ───────────────────────────────────────────────────────────────
     Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/manager/members/{id}/reset-password', [AuthController::class, 'resetMemberPassword'])->name('manager.member.reset-password');
 
+<<<<<<< HEAD
     // Manager product & category CRUD (must be inside auth)
     Route::prefix('manager')->middleware('role:2')->group(function () {
+=======
+    // ── Transaksi (Member & Manager) ──────────────────────────────────────────
+    Route::post('/checkout', [TransactionController::class, 'checkout'])->name('checkout');
+    Route::post('/transaction/{id}/pay', [TransactionController::class, 'uploadPayment'])->name('transaction.pay');
+    Route::post('/transaction/{id}/cancel', [TransactionController::class, 'cancelTransaction'])->name('transaction.cancel');
+
+    // ── Manager: verifikasi bayar & status transaksi ──────────────────────────
+    Route::post('/manager/payments/{id}/verify', [TransactionController::class, 'verifyPayment'])->name('manager.payments.verify');
+    Route::post('/manager/transactions/{id}/status', [ManagerTransactionController::class, 'updateStatus'])->name('manager.transactions.updateStatus');
+
+    // ── Review ────────────────────────────────────────────────────────────────
+    Route::post('/review', [TransactionController::class, 'storeReview'])->name('review.store');
+    Route::post('/review/{id}/reply', [TransactionController::class, 'replyReview'])->name('review.reply');
+
+    // ── Manager: Produk & Kategori ────────────────────────────────────────────
+    Route::prefix('manager')->group(function () {
+>>>>>>> d72f06bcac955d276cdadab832b07b4e48220044
         Route::get('/products', [ProductController::class, 'index'])->name('manager.products.index');
         Route::get('/products/create', [ProductController::class, 'create'])->name('manager.products.create');
         Route::post('/products', [ProductController::class, 'store'])->name('manager.products.store');
         Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('manager.products.edit');
         Route::put('/products/{id}', [ProductController::class, 'update'])->name('manager.products.update');
         Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('manager.products.destroy');
+
+        Route::get('/categories', [CategoryController::class, 'index'])->name('manager.categories.index');
+        Route::get('/categories/create', [CategoryController::class, 'create'])->name('manager.categories.create');
+        Route::post('/categories', [CategoryController::class, 'store'])->name('manager.categories.store');
+        Route::get('/categories/{id}/edit', [CategoryController::class, 'edit'])->name('manager.categories.edit');
+        Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('manager.categories.update');
+        Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('manager.categories.destroy');
     });
+<<<<<<< HEAD
 
     Route::middleware('role:2')->group(function () {
         Route::get('/categories', [CategoryController::class, 'index'])->name('manager.categories.index');
@@ -84,4 +98,6 @@ Route::middleware('auth')->group(function () {
         Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('manager.categories.update');
         Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('manager.categories.destroy');
     });
+=======
+>>>>>>> d72f06bcac955d276cdadab832b07b4e48220044
 });
