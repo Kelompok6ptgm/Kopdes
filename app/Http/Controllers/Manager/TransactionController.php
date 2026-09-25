@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 <?php
 
 namespace App\Http\Controllers\Manager;
@@ -64,4 +62,3 @@ class TransactionController extends Controller
         }
     }
 }
->>>>>>> d72f06bcac955d276cdadab832b07b4e48220044

@@ -7,12 +7,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Manager\ProductController;
 use App\Http\Controllers\Manager\CategoryController;
 use App\Http\Controllers\Manager\DashboardController;
-<<<<<<< HEAD
-=======
 use App\Http\Controllers\Manager\TransactionController as ManagerTransactionController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\CartController;
->>>>>>> d72f06bcac955d276cdadab832b07b4e48220044
+use App\Http\Controllers\ProductDetailController;
 
 // ─── Guest-only ───────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
@@ -35,7 +33,12 @@ Route::get('/products', function () {
     return redirect()->to('/#user-products');
 })->name('products.index');
 
-// Cart: accessible by guests (session) and members (DB)
+Route::get('/products/{id}', [ProductDetailController::class, 'show'])->name('product.show');
+
+    // Serve payment proof images (no symlink required)
+    Route::get('/payment-proof/{path}', [TransactionController::class, 'showPaymentProof'])->where('path', '.*')->name('payment-proof');
+
+    // Cart: accessible by guests (session) and members (DB)
 Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
 Route::post('/cart/update', [CartController::class, 'updateCart'])->name('cart.update');
 Route::post('/cart/remove', [CartController::class, 'removeFromCart'])->name('cart.remove');
@@ -54,10 +57,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::post('/manager/members/{id}/reset-password', [AuthController::class, 'resetMemberPassword'])->name('manager.member.reset-password');
 
-<<<<<<< HEAD
-    // Manager product & category CRUD (must be inside auth)
-    Route::prefix('manager')->middleware('role:2')->group(function () {
-=======
     // ── Transaksi (Member & Manager) ──────────────────────────────────────────
     Route::post('/checkout', [TransactionController::class, 'checkout'])->name('checkout');
     Route::post('/transaction/{id}/pay', [TransactionController::class, 'uploadPayment'])->name('transaction.pay');
@@ -65,15 +64,14 @@ Route::middleware('auth')->group(function () {
 
     // ── Manager: verifikasi bayar & status transaksi ──────────────────────────
     Route::post('/manager/payments/{id}/verify', [TransactionController::class, 'verifyPayment'])->name('manager.payments.verify');
-    Route::post('/manager/transactions/{id}/status', [ManagerTransactionController::class, 'updateStatus'])->name('manager.transactions.updateStatus');
+    Route::post('/manager/transactions/{id}/status', [ManagerTransactionController::class, 'updateStatus'])->name('manager.transactions.status');
 
     // ── Review ────────────────────────────────────────────────────────────────
     Route::post('/review', [TransactionController::class, 'storeReview'])->name('review.store');
     Route::post('/review/{id}/reply', [TransactionController::class, 'replyReview'])->name('review.reply');
 
     // ── Manager: Produk & Kategori ────────────────────────────────────────────
-    Route::prefix('manager')->group(function () {
->>>>>>> d72f06bcac955d276cdadab832b07b4e48220044
+    Route::prefix('manager')->middleware('role:2')->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('manager.products.index');
         Route::get('/products/create', [ProductController::class, 'create'])->name('manager.products.create');
         Route::post('/products', [ProductController::class, 'store'])->name('manager.products.store');
@@ -88,16 +86,4 @@ Route::middleware('auth')->group(function () {
         Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('manager.categories.update');
         Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('manager.categories.destroy');
     });
-<<<<<<< HEAD
-
-    Route::middleware('role:2')->group(function () {
-        Route::get('/categories', [CategoryController::class, 'index'])->name('manager.categories.index');
-        Route::get('/categories/create', [CategoryController::class, 'create'])->name('manager.categories.create');
-        Route::post('/categories', [CategoryController::class, 'store'])->name('manager.categories.store');
-        Route::get('/categories/{id}/edit', [CategoryController::class, 'edit'])->name('manager.categories.edit');
-        Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('manager.categories.update');
-        Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('manager.categories.destroy');
-    });
-=======
->>>>>>> d72f06bcac955d276cdadab832b07b4e48220044
 });

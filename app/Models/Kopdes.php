@@ -17,6 +17,8 @@ class Kopdes extends Model
         'alamat',
         'kode_pos',
         'provinsi',
+        'kota',
+        'kecamatan',
         'no_hp',
         'status',
     ];

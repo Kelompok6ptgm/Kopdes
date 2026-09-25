@@ -51,6 +51,8 @@ class KopdesController extends Controller
             'no_hp' => ['required', 'string', 'max:20'],
             'kode_pos' => ['required', 'string', 'max:10'],
             'provinsi' => ['required', 'string', 'max:255'],
+            'kota' => ['nullable', 'string', 'max:255'],
+            'kecamatan' => ['nullable', 'string', 'max:255'],
             'alamat' => ['required', 'string'],
             'status' => ['required', 'string', Rule::in(['aktif', 'nonaktif'])],
         ]);
@@ -81,6 +83,8 @@ class KopdesController extends Controller
             'no_hp' => ['required', 'string', 'max:20'],
             'kode_pos' => ['required', 'string', 'max:10'],
             'provinsi' => ['required', 'string', 'max:255'],
+            'kota' => ['nullable', 'string', 'max:255'],
+            'kecamatan' => ['nullable', 'string', 'max:255'],
             'alamat' => ['required', 'string'],
             'status' => ['required', 'string', Rule::in(['aktif', 'nonaktif'])],
         ]);
