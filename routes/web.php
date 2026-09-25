@@ -10,6 +10,7 @@ use App\Http\Controllers\Manager\DashboardController;
 use App\Http\Controllers\Manager\TransactionController as ManagerTransactionController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ProductDetailController;
 
 // ─── Guest-only ───────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
@@ -31,6 +32,8 @@ Route::get('/', function () {
 Route::get('/products', function () {
     return redirect()->to('/#user-products');
 })->name('products.index');
+
+Route::get('/products/{id}', [ProductDetailController::class, 'show'])->name('product.show');
 
 // Cart: accessible by guests (session) and members (DB)
 Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
@@ -58,7 +61,7 @@ Route::middleware('auth')->group(function () {
 
     // ── Manager: verifikasi bayar & status transaksi ──────────────────────────
     Route::post('/manager/payments/{id}/verify', [TransactionController::class, 'verifyPayment'])->name('manager.payments.verify');
-    Route::post('/manager/transactions/{id}/status', [ManagerTransactionController::class, 'updateStatus'])->name('manager.transactions.updateStatus');
+    Route::post('/manager/transactions/{id}/status', [ManagerTransactionController::class, 'updateStatus'])->name('manager.transactions.status');
 
     // ── Review ────────────────────────────────────────────────────────────────
     Route::post('/review', [TransactionController::class, 'storeReview'])->name('review.store');

@@ -69,6 +69,22 @@
                     <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
+
+                <!-- Kota / Kabupaten -->
+                <div>
+                    <label for="kota" class="block text-xs font-semibold text-gray-600 mb-1.5">Kota / Kabupaten</label>
+                    <input type="text" name="kota" id="kota" value="{{ old('kota', $kopdes->kota) }}"
+                           class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-xs transition"
+                           placeholder="Contoh: Jakarta Selatan">
+                </div>
+
+                <!-- Kecamatan -->
+                <div>
+                    <label for="kecamatan" class="block text-xs font-semibold text-gray-600 mb-1.5">Kecamatan</label>
+                    <input type="text" name="kecamatan" id="kecamatan" value="{{ old('kecamatan', $kopdes->kecamatan) }}"
+                           class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-xs transition"
+                           placeholder="Contoh: Kebayoran Baru">
+                </div>
             </div>
 
             <!-- Alamat -->

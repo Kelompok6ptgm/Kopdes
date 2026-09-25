@@ -21,22 +21,28 @@ class TransactionController extends Controller
     {
         $request->validate([
             'alamat_pengiriman' => ['required', 'string', 'max:500'],
-            'catatan' => ['nullable', 'string', 'max:500'],
+            'catatan'           => ['nullable', 'string', 'max:500'],
+            'selected_products' => ['required', 'array', 'min:1'],
+            'selected_products.*' => ['integer', 'exists:product,id_product'],
         ]);
 
         $user = Auth::user();
+        $selectedProductIds = $request->selected_products;
 
-        // Get user's cart items
-        $cartItems = Cart::where('id_user', $user->id_user)->with('product')->get();
+        // Get only the selected cart items
+        $cartItems = Cart::where('id_user', $user->id_user)
+            ->whereIn('id_product', $selectedProductIds)
+            ->with('product')
+            ->get();
 
         if ($cartItems->isEmpty()) {
-            return back()->withErrors(['error' => 'Keranjang belanja Anda kosong.']);
+            return back()->withErrors(['error' => 'Tidak ada barang yang dipilih atau barang tidak ditemukan di keranjang.']);
         }
 
         // Validate all cart items belong to the same KopDes (defense in depth after cart-level check)
         $kopdesIds = $cartItems->pluck('product.id_kopdes')->unique();
         if ($kopdesIds->count() > 1) {
-            return back()->withErrors(['error' => 'Keranjang berisi barang dari beberapa koperasi berbeda. Kosongkan keranjang dan coba lagi.']);
+            return back()->withErrors(['error' => 'Barang yang dipilih berasal dari beberapa koperasi berbeda. Pilih barang dari satu koperasi saja.']);
         }
         $idKopdes = $kopdesIds->first();
 
@@ -46,7 +52,7 @@ class TransactionController extends Controller
         }
 
         try {
-            $transaction = DB::transaction(function () use ($user, $cartItems, $idKopdes, $request) {
+            $transaction = DB::transaction(function () use ($user, $cartItems, $selectedProductIds, $idKopdes, $request) {
                 $totalHarga = 0;
 
                 // Validate stock in real-time before transaction
@@ -60,32 +66,34 @@ class TransactionController extends Controller
 
                 // Create Transaction record
                 $trx = Transaction::create([
-                    'id_user' => $user->id_user,
-                    'id_kopdes' => $idKopdes,
-                    'kode_transaksi' => 'TRX-' . time() . '-' . rand(1000, 9999),
-                    'total_harga' => $totalHarga,
-                    'status_transaksi' => 'menunggu_pembayaran',
+                    'id_user'           => $user->id_user,
+                    'id_kopdes'         => $idKopdes,
+                    'kode_transaksi'    => 'TRX-' . time() . '-' . rand(1000, 9999),
+                    'total_harga'       => $totalHarga,
+                    'status_transaksi'  => 'menunggu_pembayaran',
                     'alamat_pengiriman' => $request->alamat_pengiriman,
-                    'catatan' => $request->catatan,
+                    'catatan'           => $request->catatan,
                 ]);
 
                 // Create TransactionDetails & Deduct Stock
                 foreach ($cartItems as $item) {
                     $product = Product::find($item->id_product);
-                    
+
                     TransactionDetail::create([
                         'id_transaction' => $trx->id_transaction,
-                        'id_product' => $item->id_product,
-                        'quantity' => $item->quantity,
-                        'harga_beli' => $product->harga,
+                        'id_product'     => $item->id_product,
+                        'quantity'       => $item->quantity,
+                        'harga_beli'     => $product->harga,
                     ]);
 
-                    // Deduct stock
+                    // Deduct stock only for checked-out items
                     $product->decrement('stok', $item->quantity);
                 }
 
-                // Clear the database cart
-                Cart::where('id_user', $user->id_user)->delete();
+                // Only clear checked-out items from cart (leave the rest)
+                Cart::where('id_user', $user->id_user)
+                    ->whereIn('id_product', $selectedProductIds)
+                    ->delete();
 
                 return $trx;
             });
@@ -289,7 +297,7 @@ class TransactionController extends Controller
     }
 
     /**
-     * Store a product review tied to a specific transaction detail line (1 review per purchase).
+     * Store or update a product review (1 per user per product, editable within 30 days).
      */
     public function storeReview(Request $request)
     {
@@ -308,17 +316,34 @@ class TransactionController extends Controller
             return back()->withErrors(['error' => 'Anda hanya dapat mengulas produk dari transaksi yang sudah selesai.']);
         }
 
-        // One review per transaction detail (not overwrite across different orders)
-        \App\Models\Review::updateOrCreate(
-            ['id_transaction_detail' => $detail->id_transaction_detail],
-            [
-                'id_user'    => $user->id_user,
-                'id_product' => $detail->id_product,
-                'rating'     => $request->rating,
-                'komentar'   => $request->komentar,
-                'reviewed_at' => now(),
-            ]
-        );
+        // 1 review per user per product — check if existing review can still be edited
+        $existing = \App\Models\Review::where('id_user', $user->id_user)
+            ->where('id_product', $detail->id_product)
+            ->first();
+
+        if ($existing) {
+            $daysSince = $existing->reviewed_at
+                ? now()->diffInDays($existing->reviewed_at)
+                : 0;
+
+            if ($daysSince > 30) {
+                return back()->withErrors(['error' => 'Batas waktu edit ulasan (30 hari) telah habis.']);
+            }
+
+            $existing->update([
+                'rating'   => $request->rating,
+                'komentar' => $request->komentar,
+            ]);
+        } else {
+            \App\Models\Review::create([
+                'id_user'               => $user->id_user,
+                'id_product'            => $detail->id_product,
+                'id_transaction_detail' => $detail->id_transaction_detail,
+                'rating'                => $request->rating,
+                'komentar'              => $request->komentar,
+                'reviewed_at'           => now(),
+            ]);
+        }
 
         return back()->with('success', 'Ulasan Anda berhasil disimpan!');
     }
