@@ -82,10 +82,10 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium flex justify-center space-x-3">
                                 <!-- Tombol Edit -->
-                                <a href="{{ route('manager.products.edit', $item->id) }}" class="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1 rounded">Edit</a>
+                                <a href="{{ route('manager.products.edit', $item->id_product) }}" class="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1 rounded">Edit</a>
                                 
                                 <!-- Tombol Hapus -->
-                                <form action="{{ route('manager.products.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus produk ini?');">
+                                <form action="{{ route('manager.products.destroy', $item->id_product) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus produk ini?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 px-3 py-1 rounded">Hapus</button>

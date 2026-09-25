@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Manager\ProductController;
 use App\Http\Controllers\Manager\CategoryController;
 use App\Http\Controllers\Manager\DashboardController;
-use App\Http\Controllers\Manager\TransactionController;
-
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -69,7 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
 
     // Manager product & category CRUD (must be inside auth)
-    Route::prefix('manager')->group(function () {
+    Route::prefix('manager')->middleware('role:2')->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('manager.products.index');
         Route::get('/products/create', [ProductController::class, 'create'])->name('manager.products.create');
         Route::post('/products', [ProductController::class, 'store'])->name('manager.products.store');
@@ -78,12 +76,12 @@ Route::middleware('auth')->group(function () {
         Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('manager.products.destroy');
     });
 
-    Route::get('/categories', [CategoryController::class, 'index'])->name('manager.categories.index');
-    Route::get('/categories/create', [CategoryController::class, 'create'])->name('manager.categories.create');
-    Route::post('/categories', [CategoryController::class, 'store'])->name('manager.categories.store');
-    Route::get('/categories/{id}/edit', [CategoryController::class, 'edit'])->name('manager.categories.edit');
-    Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('manager.categories.update');
-    Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('manager.categories.destroy');
-
-    Route::put('/manager/transactions/{id}/status', [TransactionController::class, 'updateStatus'])->name('manager.transactions.updateStatus');
+    Route::middleware('role:2')->group(function () {
+        Route::get('/categories', [CategoryController::class, 'index'])->name('manager.categories.index');
+        Route::get('/categories/create', [CategoryController::class, 'create'])->name('manager.categories.create');
+        Route::post('/categories', [CategoryController::class, 'store'])->name('manager.categories.store');
+        Route::get('/categories/{id}/edit', [CategoryController::class, 'edit'])->name('manager.categories.edit');
+        Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('manager.categories.update');
+        Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('manager.categories.destroy');
+    });
 });
