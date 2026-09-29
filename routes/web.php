@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Manager\ProductController;
 use App\Http\Controllers\Manager\CategoryController;
 use App\Http\Controllers\Manager\DashboardController;
-use App\Http\Controllers\Manager\TransactionController as ManagerTransactionController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ProductDetailController;
 
 // ─── Guest-only ───────────────────────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
@@ -32,6 +32,8 @@ Route::get('/products', function () {
     return redirect()->to('/#user-products');
 })->name('products.index');
 
+Route::get('/products/{id}', [ProductDetailController::class, 'show'])->name('product.show');
+
 // Cart: accessible by guests (session) and members (DB)
 Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
 Route::post('/cart/update', [CartController::class, 'updateCart'])->name('cart.update');
@@ -47,6 +49,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('admin/manager', ManagerController::class)->names(['index' => 'admin.manager']);
     Route::post('admin/manager/{id}/reset-password', [ManagerController::class, 'resetPassword'])->name('admin.manager.reset-password');
 
+    // ── Admin: Transaksi & Laporan ─────────────────────────────────────────────
+    Route::get('admin/transaksi', [TransactionController::class, 'index'])->name('admin.transaksi');
+    Route::get('admin/transaksi/{id}', [TransactionController::class, 'show'])->name('admin.transaksi.show');
+    Route::get('admin/laporan', [TransactionController::class, 'reports'])->name('admin.laporan');
+
     // ── Profile ───────────────────────────────────────────────────────────────
     Route::post('/profile/update', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::post('/manager/members/{id}/reset-password', [AuthController::class, 'resetMemberPassword'])->name('manager.member.reset-password');
@@ -58,7 +65,7 @@ Route::middleware('auth')->group(function () {
 
     // ── Manager: verifikasi bayar & status transaksi ──────────────────────────
     Route::post('/manager/payments/{id}/verify', [TransactionController::class, 'verifyPayment'])->name('manager.payments.verify');
-    Route::post('/manager/transactions/{id}/status', [ManagerTransactionController::class, 'updateStatus'])->name('manager.transactions.updateStatus');
+    Route::post('/manager/transactions/{id}/status', [TransactionController::class, 'updateStatus'])->name('manager.transactions.status');
 
     // ── Review ────────────────────────────────────────────────────────────────
     Route::post('/review', [TransactionController::class, 'storeReview'])->name('review.store');
