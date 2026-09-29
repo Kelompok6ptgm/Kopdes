@@ -9,6 +9,7 @@ use App\Models\TransactionDetail;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Kopdes;
+use App\Models\Review;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -369,5 +370,70 @@ class TransactionController extends Controller
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * User submit ulasan produk (dari riwayat belanja)
+     */
+    public function storeReview(Request $request)
+    {
+        $request->validate([
+            'id_transaction_detail' => ['required', 'exists:transaction_detail,id_transaction_detail'],
+            'rating'                => ['required', 'integer', 'min:1', 'max:5'],
+            'komentar'              => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $user = Auth::user();
+
+        // Pastikan detail transaksi ini milik user yang login
+        $detail = TransactionDetail::whereHas('transaction', function ($q) use ($user) {
+            $q->where('id_user', $user->id_user);
+        })->findOrFail($request->id_transaction_detail);
+
+        // Cek apakah sudah pernah diulas
+        $existing = Review::where('id_transaction_detail', $detail->id_transaction_detail)->first();
+        if ($existing) {
+            return redirect()->to(route('dashboard') . '#user-history')
+                ->with('error', 'Produk ini sudah pernah Anda ulas.');
+        }
+
+        Review::create([
+            'id_user'               => $user->id_user,
+            'id_product'            => $detail->id_product,
+            'id_transaction_detail' => $detail->id_transaction_detail,
+            'rating'                => $request->rating,
+            'komentar'              => $request->komentar,
+            'reviewed_at'           => now(),
+        ]);
+
+        return redirect()->to(route('dashboard') . '#user-history')
+            ->with('success', 'Terima kasih! Ulasan Anda sudah terkirim.');
+    }
+
+    /**
+     * Manager balas ulasan produk
+     */
+    public function replyReview(Request $request, $id)
+    {
+        $request->validate([
+            'tanggapan_manager' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $manager = Auth::user();
+
+        if (!$manager || $manager->id_role != 2 || !$manager->id_kopdes) {
+            abort(403, 'Unauthorized.');
+        }
+
+        // Pastikan review ini milik produk KopDes-nya manager
+        $review = Review::whereHas('product', function ($q) use ($manager) {
+            $q->where('id_kopdes', $manager->id_kopdes);
+        })->findOrFail($id);
+
+        $review->tanggapan_manager = $request->tanggapan_manager;
+        $review->save();
+
+        return redirect()->to(route('dashboard') . '#mgr-reviews')
+            ->with('success', 'Tanggapan berhasil dikirim!');
     }
 }

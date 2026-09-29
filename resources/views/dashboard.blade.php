@@ -498,8 +498,20 @@
                     </section>
 
                     <!-- SECTION: KATEGORI PRODUK -->
-                    <section id="mgr-categories" class="tab-content hidden space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<section id="mgr-categories" class="tab-content hidden space-y-6">
+
+    @if (session('success'))
+        <div class="bg-green-50 text-green-700 p-4 rounded-xl text-sm border border-green-100 font-semibold shadow-xs">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="bg-red-50 text-red-700 p-4 rounded-xl text-sm border border-red-100 font-semibold shadow-xs">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <!-- Left: Form Tambah / Edit Kategori -->
                             <div id="category-form-container" class="bg-white rounded-xl shadow-xs p-6 border border-gray-200 h-fit">
                                 <h3 class="font-bold text-base text-gray-900 mb-4 pb-2 border-b flex items-center justify-between">
@@ -716,24 +728,73 @@
                     </section>
 
                     <!-- SECTION: ULASAN PRODUK -->
-                    <section id="mgr-reviews" class="tab-content hidden space-y-6">
-                        <h3 class="font-bold text-lg md:text-xl text-gray-900">Ulasan & Rating Produk</h3>
-                        <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6 divide-y divide-gray-150 space-y-4">
-                            @forelse ($myReviews as $rev)
-                                <div class="pt-4 first:pt-0">
-                                    <div class="flex justify-between items-center">
-                                        <h4 class="font-semibold text-gray-900 text-sm">{{ $rev->user->nama }} - <span class="text-gray-500 text-xs">{{ $rev->product->nama_produk }}</span></h4>
-                                        <div class="flex text-yellow-400 text-xs">
-                                            @for ($i = 0; $i < $rev->rating; $i++) ★ @endfor
-                                        </div>
-                                    </div>
-                                    <p class="text-xs text-gray-600 mt-2">{{ $rev->komentar }}</p>
-                                </div>
-                            @empty
-                                <p class="text-gray-400 text-center py-6 text-sm">Belum ada ulasan produk.</p>
-                            @endforelse
+<section id="mgr-reviews" class="tab-content hidden space-y-6">
+    <h3 class="font-bold text-lg md:text-xl text-gray-900">Ulasan & Rating Produk</h3>
+
+    @if (session('success'))
+        <div class="bg-green-50 text-green-700 p-4 rounded-xl text-sm border border-green-100 font-semibold shadow-xs">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="bg-red-50 text-red-700 p-4 rounded-xl text-sm border border-red-100 font-semibold shadow-xs">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-6">
+        @forelse ($myReviews as $rev)
+            <div class="pb-6 border-b border-gray-100 last:border-b-0 last:pb-0">
+                {{-- Header: Nama User, Produk, Rating --}}
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <h4 class="font-semibold text-gray-900 text-sm">{{ $rev->user->nama ?? 'Anonim' }}</h4>
+                        <span class="text-gray-500 text-xs">Produk: {{ $rev->product->nama_produk ?? 'N/A' }}</span>
+                    </div>
+                    <div class="flex text-yellow-400 text-sm">
+                        @for ($i = 0; $i < $rev->rating; $i++) ★ @endfor
+                        @for ($i = $rev->rating; $i < 5; $i++) <span class="text-gray-300">★</span> @endfor
+                    </div>
+                </div>
+
+                {{-- Komentar User --}}
+                <p class="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">{{ $rev->komentar }}</p>
+
+                {{-- Tanggal --}}
+                <span class="text-[10px] text-gray-400 block mt-1">
+                    {{ $rev->created_at ? $rev->created_at->format('d M Y, H:i') : '-' }}
+                </span>
+
+                {{-- Balasan Manager (kalo udah ada) --}}
+                @if ($rev->tanggapan_manager)
+                    <div class="mt-3 ml-6 bg-red-50 border-l-4 border-[#c52228] p-3 rounded-r-lg">
+                        <div class="flex items-center mb-1">
+                            <i class="fa-solid fa-reply text-[#c52228] text-xs mr-2"></i>
+                            <span class="text-xs font-bold text-[#c52228]">Balasan Manager</span>
                         </div>
-                    </section>
+                        <p class="text-xs text-gray-700">{{ $rev->tanggapan_manager }}</p>
+                    </div>
+                @else
+                    {{-- Form Balasan (kalo belum ada balasan) --}}
+                    <form action="{{ route('review.reply', $rev->id_review) }}" method="POST" class="mt-3 ml-6">
+                        @csrf
+                        <div class="flex items-start gap-2">
+                            <textarea name="tanggapan_manager" rows="2" required
+                                placeholder="Tulis balasan untuk ulasan ini..."
+                                class="flex-1 text-xs border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-red-500 bg-gray-50"></textarea>
+                            <button type="submit"
+                                class="bg-[#c52228] hover:bg-[#a51c21] text-white text-xs font-bold px-4 py-2 rounded-lg shadow-xs transition-all cursor-pointer whitespace-nowrap">
+                                <i class="fa-solid fa-paper-plane mr-1"></i> Kirim
+                            </button>
+                        </div>
+                    </form>
+                @endif
+            </div>
+        @empty
+            <p class="text-gray-400 text-center py-6 text-sm">Belum ada ulasan produk.</p>
+        @endforelse
+    </div>
+</section>
 
                     <!-- SECTION: DAFTAR ANGGOTA -->
                     <section id="mgr-members" class="tab-content hidden space-y-6">
