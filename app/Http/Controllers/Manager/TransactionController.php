@@ -12,6 +12,74 @@ use Illuminate\Support\Facades\DB;
 class TransactionController extends Controller
 {
     /**
+     * Display a listing of transactions for Admin/Manager.
+     */
+    public function index()
+    {
+        $user = Auth::user();
+
+        if ($user->id_role == 1) {
+            // Admin: Tampilkan semua transaksi
+            $transactions = Transaction::with(['user', 'kopdes', 'details.product'])->latest()->get();
+        } elseif ($user->id_role == 2) {
+            // Manager: Tampilkan transaksi khusus KopDes miliknya
+            $transactions = Transaction::where('id_kopdes', $user->id_kopdes)
+                ->with(['user', 'details.product'])
+                ->latest()
+                ->get();
+        } else {
+            abort(403, 'Unauthorized.');
+        }
+
+        return view('admin.transaksi.index', compact('transactions'));
+    }
+
+    /**
+     * Display a listing of payments for Admin/Manager.
+     */
+    public function payments()
+    {
+        $user = Auth::user();
+
+        if ($user->id_role == 1) {
+            $payments = Payment::with(['transaction.user', 'transaction.kopdes'])->latest()->get();
+        } elseif ($user->id_role == 2) {
+            $payments = Payment::whereHas('transaction', function ($q) use ($user) {
+                $q->where('id_kopdes', $user->id_kopdes);
+            })->with(['transaction.user'])->latest()->get();
+        } else {
+            abort(403, 'Unauthorized.');
+        }
+
+        return view('admin.pembayaran.index', compact('payments'));
+    }
+
+    /**
+     * Display transaction reports for Admin/Manager.
+     */
+    public function reports()
+    {
+        $user = Auth::user();
+
+        if ($user->id_role == 1) {
+            $transactions = Transaction::where('status_transaksi', 'selesai')
+                ->with(['user', 'kopdes'])
+                ->latest()
+                ->get();
+        } elseif ($user->id_role == 2) {
+            $transactions = Transaction::where('id_kopdes', $user->id_kopdes)
+                ->where('status_transaksi', 'selesai')
+                ->with(['user'])
+                ->latest()
+                ->get();
+        } else {
+            abort(403, 'Unauthorized.');
+        }
+
+        return view('admin.laporan.index', compact('transactions'));
+    }
+
+    /**
      * Update transaction status (Manager only).
      * Status transitions: menunggu_pembayaran → menunggu_verifikasi → diproses → dikirim → selesai
      * Or: any cancellable state → dibatalkan
