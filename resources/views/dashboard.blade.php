@@ -397,20 +397,27 @@
                     <!-- SECTION: PRODUK & STOK -->
                     <section id="mgr-products" class="tab-content hidden space-y-6">
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <!-- Left: Form Tambah Produk -->
-                            <div class="bg-white rounded-xl shadow-xs p-6 border border-gray-200 h-fit">
-                                <h3 class="font-bold text-base text-gray-900 mb-4 pb-2 border-b flex items-center">
-                                    <i class="fa-solid fa-box-open text-red-600 mr-2"></i> Tambah Produk
+                            <!-- Left: Form Tambah / Edit Produk -->
+                            <div id="product-form-container" class="bg-white rounded-xl shadow-xs p-6 border border-gray-200 h-fit">
+                                <h3 class="font-bold text-base text-gray-900 mb-4 pb-2 border-b flex items-center justify-between">
+                                    <span class="flex items-center">
+                                        <i class="fa-solid fa-box-open text-red-600 mr-2"></i>
+                                        <span id="product-form-title">Tambah Produk</span>
+                                    </span>
+                                    <button type="button" id="product-btn-cancel" onclick="resetProductForm()" class="hidden text-xs text-gray-400 hover:text-gray-600 font-semibold cursor-pointer border-none bg-transparent">
+                                        ✕ Batal Edit
+                                    </button>
                                 </h3>
-                                <form action="{{ route('manager.products.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                <form id="form-product" action="{{ route('manager.products.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                                     @csrf
+                                    <div id="product-method-container"></div>
                                     <div>
                                         <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Nama Produk</label>
-                                        <input type="text" name="nama_produk" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50">
+                                        <input type="text" id="product-input-name" name="nama_produk" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50">
                                     </div>
                                     <div>
                                         <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Kategori</label>
-                                        <select name="id_category" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-white cursor-pointer">
+                                        <select id="product-input-category" name="id_category" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-white cursor-pointer">
                                             <option value="">-- Pilih Kategori --</option>
                                             @foreach ($myCategories as $cat)
                                                 <option value="{{ $cat->id_category }}">{{ $cat->nama_kategori }}</option>
@@ -420,22 +427,26 @@
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
                                             <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Harga (Rp)</label>
-                                            <input type="number" name="harga" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50">
+                                            <input type="number" id="product-input-price" name="harga" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50">
                                         </div>
                                         <div>
                                             <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Stok</label>
-                                            <input type="number" name="stok" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50">
+                                            <input type="number" id="product-input-stock" name="stok" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50">
                                         </div>
                                     </div>
                                     <div>
                                         <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Deskripsi</label>
-                                        <textarea name="deskripsi" rows="2" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50"></textarea>
+                                        <textarea id="product-input-desc" name="deskripsi" rows="2" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50"></textarea>
                                     </div>
                                     <div>
                                         <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Foto Produk</label>
+                                        <div id="product-current-image-preview" class="hidden mb-2 items-center gap-2">
+                                            <img id="product-preview-img" src="" alt="Preview" class="w-10 h-10 rounded object-cover border">
+                                            <span class="text-[11px] text-gray-400">Foto saat ini (biarkan kosong jika tidak diganti)</span>
+                                        </div>
                                         <input type="file" name="foto" accept="image/*" class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer">
                                     </div>
-                                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg text-sm shadow transition cursor-pointer border-none">
+                                    <button type="submit" id="product-btn-submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg text-sm shadow transition cursor-pointer border-none">
                                         Simpan Produk
                                     </button>
                                 </form>
@@ -466,7 +477,11 @@
                                                 <td class="p-4 font-semibold">Rp {{ number_format($prod->harga, 0, ',', '.') }}</td>
                                                 <td class="p-4 font-bold text-blue-600">{{ $prod->stok }} pcs</td>
                                                 <td class="p-4 text-right space-x-2">
-                                                    <a href="{{ route('manager.products.edit', $prod->id_product) }}" class="text-blue-600 hover:underline text-xs font-semibold">Edit</a>
+                                                    <button type="button" 
+                                                        onclick="editProductInline({{ $prod->id_product }}, {{ json_encode($prod->nama_produk) }}, {{ $prod->id_category }}, {{ (int)$prod->harga }}, {{ $prod->stok }}, {{ json_encode($prod->deskripsi ?? '') }}, '{{ $prod->gambar ? asset($prod->gambar) : '' }}')" 
+                                                        class="text-blue-600 hover:underline text-xs font-semibold cursor-pointer border-none bg-transparent">
+                                                        Edit
+                                                    </button>
                                                     <form action="{{ route('manager.products.destroy', $prod->id_product) }}" method="POST" class="inline" onsubmit="return confirm('Hapus produk ini?');">
                                                         @csrf @method('DELETE')
                                                         <button type="submit" class="text-red-600 hover:underline text-xs font-semibold cursor-pointer border-none bg-transparent">Hapus</button>
@@ -485,18 +500,25 @@
                     <!-- SECTION: KATEGORI PRODUK -->
                     <section id="mgr-categories" class="tab-content hidden space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- Left: Form Tambah Kategori -->
-                            <div class="bg-white rounded-xl shadow-xs p-6 border border-gray-200 h-fit">
-                                <h3 class="font-bold text-base text-gray-900 mb-4 pb-2 border-b flex items-center">
-                                    <i class="fa-solid fa-tags text-red-600 mr-2"></i> Tambah Kategori
+                            <!-- Left: Form Tambah / Edit Kategori -->
+                            <div id="category-form-container" class="bg-white rounded-xl shadow-xs p-6 border border-gray-200 h-fit">
+                                <h3 class="font-bold text-base text-gray-900 mb-4 pb-2 border-b flex items-center justify-between">
+                                    <span class="flex items-center">
+                                        <i class="fa-solid fa-tags text-red-600 mr-2"></i>
+                                        <span id="category-form-title">Tambah Kategori</span>
+                                    </span>
+                                    <button type="button" id="category-btn-cancel" onclick="resetCategoryForm()" class="hidden text-xs text-gray-400 hover:text-gray-600 font-semibold cursor-pointer border-none bg-transparent">
+                                        ✕ Batal Edit
+                                    </button>
                                 </h3>
-                                <form action="{{ route('manager.categories.store') }}" method="POST">
+                                <form id="form-category" action="{{ route('manager.categories.store') }}" method="POST">
                                     @csrf
+                                    <div id="category-method-container"></div>
                                     <div class="mb-4">
                                         <label class="block text-gray-700 text-xs font-bold mb-1 uppercase">Nama Kategori</label>
-                                        <input type="text" name="nama_kategori" required placeholder="Contoh: Sembako" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50">
+                                        <input type="text" id="category-input-name" name="nama_kategori" required placeholder="Contoh: Sembako" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500 bg-gray-50">
                                     </div>
-                                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg text-sm shadow transition cursor-pointer border-none">
+                                    <button type="submit" id="category-btn-submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg text-sm shadow transition cursor-pointer border-none">
                                         Simpan Kategori
                                     </button>
                                 </form>
@@ -516,7 +538,11 @@
                                             <tr>
                                                 <td class="p-4 font-semibold text-gray-900">{{ $cat->nama_kategori }}</td>
                                                 <td class="p-4 text-right space-x-2">
-                                                    <a href="{{ route('manager.categories.edit', $cat->id_category) }}" class="text-blue-600 hover:underline text-xs font-semibold">Edit</a>
+                                                    <button type="button" 
+                                                        onclick="editCategoryInline({{ $cat->id_category }}, {{ json_encode($cat->nama_kategori) }})" 
+                                                        class="text-blue-600 hover:underline text-xs font-semibold cursor-pointer border-none bg-transparent">
+                                                        Edit
+                                                    </button>
                                                     <form action="{{ route('manager.categories.destroy', $cat->id_category) }}" method="POST" class="inline" onsubmit="return confirm('Hapus kategori ini?');">
                                                         @csrf @method('DELETE')
                                                         <button type="submit" class="text-red-600 hover:underline text-xs font-semibold cursor-pointer border-none bg-transparent">Hapus</button>
@@ -2016,6 +2042,96 @@
                 btn.textContent = 'Detail ▴';
             }
         }
+
+        // ── Inline Manager Product & Category Editing ──────────────────────────────
+        function editProductInline(id, name, categoryId, price, stock, desc, imgSrc) {
+            const form = document.getElementById('form-product');
+            const title = document.getElementById('product-form-title');
+            const btnSubmit = document.getElementById('product-btn-submit');
+            const btnCancel = document.getElementById('product-btn-cancel');
+            const methodContainer = document.getElementById('product-method-container');
+            const previewContainer = document.getElementById('product-current-image-preview');
+            const previewImg = document.getElementById('product-preview-img');
+
+            if (!form) return;
+
+            form.action = `/manager/products/${id}`;
+            methodContainer.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+            document.getElementById('product-input-name').value = name;
+            document.getElementById('product-input-category').value = categoryId;
+            document.getElementById('product-input-price').value = price;
+            document.getElementById('product-input-stock').value = stock;
+            document.getElementById('product-input-desc').value = desc || '';
+
+            if (imgSrc) {
+                previewImg.src = imgSrc;
+                previewContainer.classList.remove('hidden');
+                previewContainer.classList.add('flex');
+            } else {
+                previewContainer.classList.add('hidden');
+                previewContainer.classList.remove('flex');
+            }
+
+            if (title) title.textContent = 'Edit: ' + name;
+            if (btnSubmit) btnSubmit.textContent = 'Update Perubahan Produk';
+            if (btnCancel) btnCancel.classList.remove('hidden');
+
+            const container = document.getElementById('product-form-container');
+            if (container) {
+                container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function resetProductForm() {
+            const form = document.getElementById('form-product');
+            if (!form) return;
+            form.reset();
+            form.action = '{{ route("manager.products.store") }}';
+            document.getElementById('product-method-container').innerHTML = '';
+            document.getElementById('product-form-title').textContent = 'Tambah Produk';
+            document.getElementById('product-btn-submit').textContent = 'Simpan Produk';
+            document.getElementById('product-btn-cancel').classList.add('hidden');
+            const previewContainer = document.getElementById('product-current-image-preview');
+            if (previewContainer) {
+                previewContainer.classList.add('hidden');
+                previewContainer.classList.remove('flex');
+            }
+        }
+
+        function editCategoryInline(id, name) {
+            const form = document.getElementById('form-category');
+            const title = document.getElementById('category-form-title');
+            const btnSubmit = document.getElementById('category-btn-submit');
+            const btnCancel = document.getElementById('category-btn-cancel');
+            const methodContainer = document.getElementById('category-method-container');
+
+            if (!form) return;
+
+            form.action = `/manager/categories/${id}`;
+            methodContainer.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+            document.getElementById('category-input-name').value = name;
+
+            if (title) title.textContent = 'Edit: ' + name;
+            if (btnSubmit) btnSubmit.textContent = 'Update Kategori';
+            if (btnCancel) btnCancel.classList.remove('hidden');
+
+            const container = document.getElementById('category-form-container');
+            if (container) {
+                container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function resetCategoryForm() {
+            const form = document.getElementById('form-category');
+            if (!form) return;
+            form.reset();
+            form.action = '{{ route("manager.categories.store") }}';
+            document.getElementById('category-method-container').innerHTML = '';
+            document.getElementById('category-form-title').textContent = 'Tambah Kategori';
+            document.getElementById('category-btn-submit').textContent = 'Simpan Kategori';
+            document.getElementById('category-btn-cancel').classList.add('hidden');
+        }
     </script>
+
 </body>
 </html>

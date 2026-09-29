@@ -47,7 +47,7 @@ class CategoryController extends Controller
         $category->id_kopdes = $id_kopdes;
         $category->save();
 
-        return redirect()->route('manager.categories.index')->with('success', 'Kategori berhasil ditambahkan!');
+        return redirect()->to(route('dashboard') . '#mgr-categories')->with('success', 'Kategori berhasil ditambahkan!');
     }
 
     public function edit($id)
@@ -69,7 +69,7 @@ class CategoryController extends Controller
         $category->nama_kategori = $request->nama_kategori;
         $category->save();
 
-        return redirect()->route('manager.categories.index')->with('success', 'Kategori berhasil diperbarui!');
+        return redirect()->to(route('dashboard') . '#mgr-categories')->with('success', 'Kategori berhasil diperbarui!');
     }
 
     public function destroy($id)

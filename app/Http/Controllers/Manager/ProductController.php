@@ -109,7 +109,7 @@ class ProductController extends Controller
 
         $product->save();
 
-        return redirect()->route('manager.products.index')->with('success', 'Produk berhasil diperbarui!');
+        return redirect()->to(route('dashboard') . '#mgr-products')->with('success', 'Produk berhasil diperbarui!');
     }
 
     public function destroy($id)
