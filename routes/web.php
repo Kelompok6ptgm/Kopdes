@@ -22,7 +22,7 @@ Route::middleware('guest')->group(function () {
 
 // ─── Public ────────────────────────────────────────────────────────────────────
 Route::get('/', function () {
-    if (auth()->check()) {
+    if (\Illuminate\Support\Facades\Auth::check()) {
         return redirect()->route('dashboard');
     }
     return view('dashboard');
@@ -34,10 +34,10 @@ Route::get('/products', function () {
 
 Route::get('/products/{id}', [ProductDetailController::class, 'show'])->name('product.show');
 
-    // Serve payment proof images (no symlink required)
-    Route::get('/payment-proof/{path}', [TransactionController::class, 'showPaymentProof'])->where('path', '.*')->name('payment-proof');
+// Serve payment proof images (no symlink required)
+Route::get('/payment-proof/{path}', [TransactionController::class, 'showPaymentProof'])->where('path', '.*')->name('payment-proof');
 
-    // Cart: accessible by guests (session) and members (DB)
+// Cart: accessible by guests (session) and members (DB)
 Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
 Route::post('/cart/update', [CartController::class, 'updateCart'])->name('cart.update');
 Route::post('/cart/remove', [CartController::class, 'removeFromCart'])->name('cart.remove');

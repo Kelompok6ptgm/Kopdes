@@ -74,10 +74,15 @@ class CategoryController extends Controller
 
     public function destroy($id)
     {
-        $id_kopdes = $this->idKopdes();
-        $category = Category::where('id_kopdes', $id_kopdes)->findOrFail($id);
+        $category = Category::findOrFail($id);
+
+        // Cek apakah masih ada produk yang menggunakan kategori ini
+        if ($category->products()->count() > 0) {
+            return redirect()->back()->with('error', 'Kategori tidak dapat dihapus karena masih digunakan oleh produk!');
+        }
+
         $category->delete();
 
-        return redirect()->route('manager.categories.index')->with('success', 'Kategori berhasil dihapus!');
+        return redirect()->route('manager.categories.index')->with('success', 'Kategori berhasil dihapus.');
     }
 }

@@ -1,109 +1,102 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manajemen Produk - KopDes</title>
-    <!-- Pastikan Tailwind udah jalan dari setup awal temen lo -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body class="bg-gray-50 text-gray-800">
 
-    <!-- Navbar Simple Tema Merah (Sesuai Gambar Lo) -->
-    <nav class="bg-white shadow border-b-2 border-red-600">
+    <!-- Navbar / Header Utama (Seragam) -->
+    <nav class="bg-white shadow border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <span class="font-bold text-2xl text-red-600">KOPDES</span>
-                    <span class="ml-2 text-sm text-gray-500">| Manager Panel</span>
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-red-600 p-2 rounded-lg text-white">
+                        <i class="fa-solid fa-store text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-xl text-red-600 tracking-wide">KopDes</span>
+                        <span class="text-xs text-gray-500 block font-medium">Manager Panel</span>
+                    </div>
                 </div>
+
+                <!-- Menu Navigasi Kanan -->
                 <div class="flex items-center space-x-6">
-                    <a href="#" class="text-gray-600 hover:text-red-600 font-medium">Home</a>
-                    <a href="#" class="text-red-600 border-b-2 border-red-600 font-medium">Products</a>
-                    <a href="#" class="text-gray-600 hover:text-red-600 font-medium">Transaction</a>
+                    <a href="{{ route('dashboard') }}" class="text-sm font-semibold text-gray-600 hover:text-red-600 transition">Dashboard</a>
+                    <a href="{{ route('manager.products.index') }}" class="text-sm font-semibold text-red-600">Products</a>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Konten Utama -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <!-- Pesan Sukses -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
         @if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <span class="block sm:inline">{{ session('success') }}</span>
+        <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow-sm mb-6 text-sm" role="alert">
+            <span class="font-medium">{{ session('success') }}</span>
         </div>
         @endif
 
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Daftar Produk Anda</h1>
-            <!-- Tombol Tambah Produk -->
+            <h1 class="text-2xl font-bold text-gray-800">Daftar Produk Anda</h1>
             <a href="{{ route('manager.products.create') }}"
-                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow">
-                + Tambah Produk
+                class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition flex items-center space-x-2">
+                <i class="fa-solid fa-plus text-sm"></i>
+                <span>Tambah Produk</span>
             </a>
         </div>
 
         <!-- Tabel Produk -->
-        <div class="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
+        <div class="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-200">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-red-50">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-red-700 uppercase tracking-wider">Nama
-                            Produk</th>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-red-700 uppercase tracking-wider">Kategori
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-red-700 uppercase tracking-wider">Harga
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-red-700 uppercase tracking-wider">Stok
-                        </th>
-                        <th class="px-6 py-3 text-center text-xs font-bold text-red-700 uppercase tracking-wider">Aksi
-                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nama Produk</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Kategori</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Harga</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Stok</th>
+                        <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    <!-- Nanti data dari database di-loop di sini -->
                     @forelse ($products as $item)
-                        <tr>
+                        <tr class="hover:bg-gray-50 transition">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 {{ $item->nama_produk ?? $item->name }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $item->category->nama_kategori ?? 'Tanpa Kategori' }}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {{ $item->category->nama_kategori ?? $item->category->name ?? '-' }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                 Rp {{ number_format($item->harga ?? $item->price, 0, ',', '.') }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                 {{ $item->stok ?? $item->stock }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium flex justify-center space-x-3">
-                                <!-- Tombol Edit -->
-                                <a href="{{ route('manager.products.edit', $item->id_product) }}" class="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1 rounded">Edit</a>
-                                
-                                <!-- Tombol Hapus -->
-                                <form action="{{ route('manager.products.destroy', $item->id_product) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus produk ini?');">
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium flex justify-center space-x-2">
+                                <a href="{{ route('manager.products.edit', $item->id_product ?? $item->id) }}" class="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">Edit</a>
+                                <form action="{{ route('manager.products.destroy', $item->id_product ?? $item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus produk ini?');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 px-3 py-1 rounded">Hapus</button>
+                                    <button type="submit" class="text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">Hapus</button>
                                 </form>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5"
-                                class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 italic">
-                                Belum ada produk di KopDes Anda.
+                            <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500 italic">
+                                Belum ada produk terdaftar.
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-    </div>
+    </main>
 </body>
-
 </html>

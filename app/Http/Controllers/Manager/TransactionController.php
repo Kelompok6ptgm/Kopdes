@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Manager;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use App\Models\Payment;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -81,8 +82,6 @@ class TransactionController extends Controller
 
     /**
      * Update transaction status (Manager only).
-     * Status transitions: menunggu_pembayaran → menunggu_verifikasi → diproses → dikirim → selesai
-     * Or: any cancellable state → dibatalkan
      */
     public function updateStatus(Request $request, $id)
     {
@@ -128,5 +127,49 @@ class TransactionController extends Controller
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Verify payment (Manager only).
+     */
+    public function verifyPayment(Request $request, $id)
+    {
+        $manager = Auth::user();
+        if ($manager->id_role != 2) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $payment = Payment::with('transaction')->findOrFail($id);
+
+        if ($payment->transaction->id_kopdes != $manager->id_kopdes) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $payment->status_pembayaran = 'diterima';
+        $payment->save();
+
+        // Update transaction status to diproses / waiting processing
+        $payment->transaction->status_transaksi = 'diproses';
+        $payment->transaction->save();
+
+        return back()->with('success', 'Pembayaran berhasil diverifikasi.');
+    }
+
+    /**
+     * Reply to user review (Manager/Admin).
+     */
+    public function replyReview(Request $request, $id)
+    {
+        $request->validate([
+            'reply' => 'required|string|max:500',
+        ]);
+
+        $review = Review::findOrFail($id);
+        
+        $review->update([
+            'reply' => $request->reply,
+        ]);
+
+        return redirect()->back()->with('success', 'Balasan ulasan berhasil dikirim.');
     }
 }
