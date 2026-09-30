@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KopdesController;
 use App\Http\Controllers\ManagerController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Manager\ProductController;
 use App\Http\Controllers\Manager\CategoryController;
 use App\Http\Controllers\Manager\DashboardController;
@@ -35,7 +36,10 @@ Route::get('/products', function () {
 Route::get('/products/{id}', [ProductDetailController::class, 'show'])->name('product.show');
 
 // Serve payment proof images (no symlink required)
-Route::get('/payment-proof/{path}', [TransactionController::class, 'showPaymentProof'])->where('path', '.*')->name('payment-proof');
+Route::get('/payment-proof/{path}', [TransactionController::class, 'showPaymentProof'])
+    ->where('path', '.*')
+    ->middleware('auth')
+    ->name('payment-proof');
 
 // Cart: accessible by guests (session) and members (DB)
 Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');

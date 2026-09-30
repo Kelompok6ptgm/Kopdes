@@ -9,6 +9,7 @@ use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class TransactionController extends Controller
 {
@@ -21,7 +22,9 @@ class TransactionController extends Controller
 
         if ($user->id_role == 1) {
             // Admin: Tampilkan semua transaksi
-            $transactions = Transaction::with(['user', 'kopdes', 'details.product'])->latest()->get();
+            $transactions = Transaction::with(['user', 'kopdes', 'details.product'])
+                ->latest()
+                ->get();
         } elseif ($user->id_role == 2) {
             // Manager: Tampilkan transaksi khusus KopDes miliknya
             $transactions = Transaction::where('id_kopdes', $user->id_kopdes)
@@ -43,11 +46,16 @@ class TransactionController extends Controller
         $user = Auth::user();
 
         if ($user->id_role == 1) {
-            $payments = Payment::with(['transaction.user', 'transaction.kopdes'])->latest()->get();
+            $payments = Payment::with(['transaction.user', 'transaction.kopdes'])
+                ->latest()
+                ->get();
         } elseif ($user->id_role == 2) {
             $payments = Payment::whereHas('transaction', function ($q) use ($user) {
                 $q->where('id_kopdes', $user->id_kopdes);
-            })->with(['transaction.user'])->latest()->get();
+            })
+                ->with(['transaction.user'])
+                ->latest()
+                ->get();
         } else {
             abort(403, 'Unauthorized.');
         }
@@ -90,6 +98,7 @@ class TransactionController extends Controller
         ]);
 
         $manager = Auth::user();
+
         if ($manager->id_role != 2) {
             abort(403, 'Unauthorized.');
         }
@@ -115,15 +124,22 @@ class TransactionController extends Controller
                 // Restore stock when cancelling
                 if ($newStatus === 'dibatalkan' && $oldStatus !== 'dibatalkan') {
                     foreach ($trx->details as $detail) {
-                        \App\Models\Product::lockForUpdate()->find($detail->id_product)?->increment('stok', $detail->quantity);
+                        \App\Models\Product::lockForUpdate()
+                            ->find($detail->id_product)
+                            ?->increment('stok', $detail->quantity);
                     }
+
                     // Also update payment status if any
                     Payment::where('id_transaction', $trx->id_transaction)
                         ->update(['status_pembayaran' => 'ditolak']);
                 }
             });
 
-            return back()->with('success', 'Status transaksi "' . $trx->kode_transaksi . '" diperbarui menjadi: ' . strtoupper($newStatus));
+            return back()->with(
+                'success',
+                'Status transaksi "' . $trx->kode_transaksi .
+                '" diperbarui menjadi: ' . strtoupper($newStatus)
+            );
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
@@ -135,6 +151,7 @@ class TransactionController extends Controller
     public function verifyPayment(Request $request, $id)
     {
         $manager = Auth::user();
+
         if ($manager->id_role != 2) {
             abort(403, 'Unauthorized.');
         }
@@ -165,11 +182,48 @@ class TransactionController extends Controller
         ]);
 
         $review = Review::findOrFail($id);
-        
+
         $review->update([
             'reply' => $request->reply,
         ]);
 
         return redirect()->back()->with('success', 'Balasan ulasan berhasil dikirim.');
+    }
+
+    /**
+     * Display payment proof image for Admin/Manager.
+     */
+    public function showPaymentProof($path)
+    {
+        $filename = basename($path);
+
+        if ($filename !== $path) {
+            abort(404);
+        }
+
+        $filePath = 'payments/' . $filename;
+
+        $payment = Payment::with('transaction')
+            ->where('bukti_pembayaran', $filePath)
+            ->firstOrFail();
+
+        $user = Auth::user();
+
+        if (!$user || !in_array($user->id_role, [1, 2])) {
+            abort(403, 'Unauthorized.');
+        }
+
+        if (
+            $user->id_role == 2 &&
+            $payment->transaction->id_kopdes != $user->id_kopdes
+        ) {
+            abort(403, 'Unauthorized.');
+        }
+
+        if (!Storage::disk('public')->exists($filePath)) {
+            abort(404, 'Bukti pembayaran tidak ditemukan.');
+        }
+
+        return response()->file(Storage::disk('public')->path($filePath));
     }
 }
