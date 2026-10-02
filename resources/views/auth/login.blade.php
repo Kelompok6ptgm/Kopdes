@@ -80,7 +80,10 @@
                     </label>
                     <input type="email" id="email" name="email" value="{{ old('email') }}"
                         placeholder="Contoh: johndoe@gmail.com" required
-                        class="w-full px-4 py-3 bg-[#f0f4f8] border border-transparent rounded-lg text-sm focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all placeholder-gray-400">
+                        class="w-full px-4 py-3 bg-[#f0f4f8] border @error('email') border-red-500 bg-red-50/30 @else border-transparent @enderror rounded-lg text-sm focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all placeholder-gray-400">
+                    @error('email')
+                        <p class="text-xs text-red-600 mt-1.5 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Password -->
@@ -99,7 +102,7 @@
                     </div>
                     <div class="relative">
                         <input type="password" id="password" name="password" placeholder="******" required
-                            class="w-full px-4 py-3 bg-[#f0f4f8] border border-transparent rounded-lg text-sm focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all placeholder-gray-400 pr-10">
+                            class="w-full px-4 py-3 bg-[#f0f4f8] border @error('password') border-red-500 bg-red-50/30 @else border-transparent @enderror rounded-lg text-sm focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all placeholder-gray-400 pr-10">
                         <!-- Toggle Eye Button -->
                         <button type="button" onclick="togglePasswordVisibility()"
                             class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
@@ -119,14 +122,16 @@
                             </svg>
                         </button>
                     </div>
+                    @error('password')
+                        <p class="text-xs text-red-600 mt-1.5 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Remember Me -->
                 <div class="flex items-center">
-                    <input type="checkbox" id="remember" name="remember"
-                        class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
-                    <label for="remember" class="ml-2 text-sm text-gray-600 select-none font-medium">Ingat saya di
-                        perangkat ini</label>
+                    <input type="checkbox" id="remember" name="remember" value="1" {{ old('remember') ? 'checked' : '' }}
+                        class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 cursor-pointer">
+                    <label for="remember" class="ml-2 text-sm text-gray-600 select-none font-medium cursor-pointer">Ingat saya di perangkat ini</label>
                 </div>
 
                 <!-- Submit Button -->

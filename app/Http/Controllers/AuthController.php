@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -19,26 +21,43 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle authentication attempt.
+     * Handle authentication attempt with rate-limiting & remember-me.
      */
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+        $request->validate([
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', 'string'],
+        ], [
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format alamat email tidak valid.',
+            'password.required' => 'Kata sandi wajib diisi.',
         ]);
 
-        $remember = $request->has('remember');
+        $throttleKey = Str::transliterate(Str::lower($request->input('email')) . '|' . $request->ip());
 
-        if (Auth::attempt($credentials, $remember)) {
+        // Max 5 attempts per minute to prevent brute-force attacks
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            throw ValidationException::withMessages([
+                'email' => "Terlalu banyak percobaan masuk yang gagal. Demi keamanan, silakan coba lagi dalam {$seconds} detik.",
+            ]);
+        }
+
+        $remember = $request->boolean('remember');
+
+        if (Auth::attempt($request->only('email', 'password'), $remember)) {
+            RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
             $this->mergeSessionCart();
 
             return redirect()->intended('/dashboard');
         }
 
+        RateLimiter::hit($throttleKey, 60);
+
         throw ValidationException::withMessages([
-            'email' => __('auth.failed'),
+            'email' => 'Email atau kata sandi yang Anda masukkan tidak sesuai.',
         ]);
     }
 
@@ -51,16 +70,31 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle user registration.
+     * Handle user registration with strict data validation & password confirmation.
      */
     public function register(Request $request)
     {
         $request->validate([
-            'nama' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:user,email'],
-            'no_hp' => ['required', 'string', 'max:20'],
-            'kode_pos' => ['required', 'string', 'max:10'],
-            'password' => ['required', 'string', 'min:8'],
+            'nama' => ['required', 'string', 'min:3', 'max:100', 'regex:/^[a-zA-Z\s\.\,\'\-]+$/'],
+            'email' => ['required', 'string', 'email:rfc', 'max:255', 'unique:user,email'],
+            'no_hp' => ['required', 'string', 'regex:/^(?:\+62|62|0)8[1-9][0-9]{6,11}$/', 'unique:user,no_hp'],
+            'kode_pos' => ['required', 'string', 'regex:/^[0-9]{5}$/'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'nama.required' => 'Nama lengkap wajib diisi.',
+            'nama.min' => 'Nama lengkap minimal terdiri dari 3 karakter.',
+            'nama.regex' => 'Nama lengkap hanya boleh memuat huruf alfabet, spasi, dan tanda baca umum.',
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format alamat email tidak valid.',
+            'email.unique' => 'Alamat email ini sudah terdaftar. Silakan gunakan email lain atau masuk ke akun Anda.',
+            'no_hp.required' => 'Nomor handphone wajib diisi.',
+            'no_hp.regex' => 'Format nomor HP tidak valid (contoh: 081234567890, diawali 08/628 dan terdiri dari 10-14 digit).',
+            'no_hp.unique' => 'Nomor handphone ini sudah digunakan oleh akun lain.',
+            'kode_pos.required' => 'Kode pos wilayah wajib diisi.',
+            'kode_pos.regex' => 'Kode pos harus berupa 5 digit angka yang valid.',
+            'password.required' => 'Kata sandi wajib diisi.',
+            'password.min' => 'Kata sandi minimal terdiri dari 8 karakter demi keamanan.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok dengan kata sandi yang dimasukkan.',
         ]);
 
         $kopdes = \App\Models\Kopdes::where('status', 'aktif')->where('kode_pos', $request->kode_pos)->first();
@@ -83,7 +117,7 @@ class AuthController extends Controller
         Auth::login($user);
         $this->mergeSessionCart();
 
-        return redirect('/dashboard')->with('success', 'Pendaftaran berhasil! Selamat datang.');
+        return redirect('/dashboard')->with('success', 'Pendaftaran berhasil! Selamat datang di Koperasi Desa.');
     }
 
     /**
