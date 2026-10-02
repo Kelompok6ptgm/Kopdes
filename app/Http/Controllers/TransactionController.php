@@ -63,25 +63,6 @@ class TransactionController extends Controller
         return view('admin.transaksi.show', compact('kopdes'));
     }
 
-    /**
-     * Display a listing of payments for Admin/Manager.
-     */
-    public function payments()
-    {
-        $user = Auth::user();
-
-        if ($user->id_role == 1) {
-            $payments = Payment::with(['transaction.user', 'transaction.kopdes'])->latest()->get();
-        } elseif ($user->id_role == 2) {
-            $payments = Payment::whereHas('transaction', function ($q) use ($user) {
-                $q->where('id_kopdes', $user->id_kopdes);
-            })->with(['transaction.user'])->latest()->get();
-        } else {
-            abort(403, 'Unauthorized.');
-        }
-
-        return view('admin.pembayaran.index', compact('payments'));
-    }
 
     /**
      * Display transaction reports per KopDes per month.
@@ -94,7 +75,7 @@ class TransactionController extends Controller
             abort(403, 'Unauthorized.');
         }
 
-        $bulan = $request->input('bulan', date('m'));
+        $bulan = $request->input('bulan', 'all');
         $tahun = $request->input('tahun', date('Y'));
 
         $kopdesQuery = Kopdes::query();
@@ -104,8 +85,12 @@ class TransactionController extends Controller
         }
 
         $laporan = $kopdesQuery->with(['transactions' => function ($q) use ($bulan, $tahun) {
-            $q->whereMonth('created_at', $bulan)
-              ->whereYear('created_at', $tahun);
+            if ($bulan && $bulan !== 'all') {
+                $q->whereMonth('created_at', $bulan);
+            }
+            if ($tahun && $tahun !== 'all') {
+                $q->whereYear('created_at', $tahun);
+            }
         }])->get()->map(function ($kopdes) {
             $transaksiBerhasil = $kopdes->transactions->whereIn('status_transaksi', ['diproses', 'dikirim', 'selesai']);
             

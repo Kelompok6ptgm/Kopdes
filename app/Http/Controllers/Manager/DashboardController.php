@@ -25,8 +25,11 @@ class DashboardController extends Controller
             $totalKopdes      = Kopdes::count();
             $totalManager     = User::where('id_role', 2)->count();
             $totalTransaksi   = Transaction::count();
-            $totalPembayaran  = Payment::where('status_pembayaran', 'diverifikasi')->sum('jumlah_bayar');
-            $latestTransactions = Transaction::with(['kopdes', 'user'])->latest()->take(5)->get();
+            $totalPembayaran  = Transaction::whereIn('status_transaksi', ['diproses', 'dikirim', 'selesai'])->sum('total_harga');
+            if ($totalPembayaran == 0) {
+                $totalPembayaran = Payment::where('status_pembayaran', 'diverifikasi')->sum('jumlah_bayar');
+            }
+            $latestTransactions = Transaction::with(['kopdes', 'user'])->latest('id_transaction')->take(5)->get();
 
             return $this->noCache(view('admin.dashboard', compact(
                 'totalKopdes', 'totalManager', 'totalTransaksi', 'totalPembayaran', 'latestTransactions'

@@ -37,6 +37,7 @@
 
         @php
             $namaBulan = [
+                'all' => 'Semua Bulan (Keseluruhan)',
                 '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',
                 '04' => 'April', '05' => 'Mei', '06' => 'Juni',
                 '07' => 'Juli', '08' => 'Agustus', '09' => 'September',
@@ -140,7 +141,7 @@
             <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div>
                     <h3 class="font-bold text-slate-900 text-base">Rincian Performa KopDes</h3>
-                    <p class="text-xs text-slate-500">Rekapan aktif untuk bulan <span class="font-semibold text-red-600">{{ $namaBulan[$bulan] ?? $bulan }} {{ $tahun }}</span></p>
+                    <p class="text-xs text-slate-500">Rekapan aktif untuk: <span class="font-semibold text-red-600">{{ $namaBulan[$bulan] ?? $bulan }} {{ $tahun }}</span></p>
                 </div>
                 <span class="text-xs font-semibold text-red-700 bg-red-50 px-3 py-1.5 rounded-full border border-red-100">
                     {{ count($laporan) }} KopDes Terdaftar

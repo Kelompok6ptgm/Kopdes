@@ -144,48 +144,50 @@
 </div>
 
 <!-- Reset Password Modal (Compact & Elegant Layout) -->
-<div id="resetPasswordModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
-    <div class="flex items-center justify-center min-h-screen px-4 text-center p-0">
-        <!-- Background overlay -->
-        <div class="fixed inset-0 transition-opacity bg-black/40" onclick="closeResetModal()"></div>
+<div id="resetPasswordModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <!-- Background overlay (terang & lembut) -->
+    <div class="fixed inset-0 bg-black/15 backdrop-blur-[2px] transition-opacity" onclick="closeResetModal()"></div>
 
-        <!-- Center modal content -->
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-        <div class="inline-block align-middle bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-gray-200">
-            <form id="resetPasswordForm" method="POST" action="">
-                @csrf
-                <div class="bg-white px-5 py-4 border-b border-gray-150">
+    <!-- Center modal content -->
+    <div class="relative z-10 bg-white rounded-2xl text-left overflow-hidden shadow-2xl border border-gray-150 w-full max-w-md transform transition-all animate-in fade-in zoom-in-95 duration-150">
+        <form id="resetPasswordForm" method="POST" action="">
+            @csrf
+            <div class="bg-white px-6 py-4.5 border-b border-gray-100 flex items-center justify-between">
+                <div>
                     <h3 class="text-sm font-bold text-gray-800">Reset Password Manager</h3>
                     <p class="text-xs text-gray-400 mt-0.5">Nama: <span id="resetManagerName" class="font-semibold text-gray-700"></span></p>
                 </div>
-                <div class="bg-white px-5 py-4 space-y-3.5">
-                    <!-- New Password -->
-                    <div>
-                        <label for="password" class="block text-xs font-semibold text-gray-600 mb-1.5">Password Baru</label>
-                        <input type="password" name="password" id="password" required minlength="8"
-                               class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-xs transition"
-                               placeholder="Min 8 karakter...">
-                    </div>
-                    <!-- Confirm Password -->
-                    <div>
-                        <label for="password_confirmation" class="block text-xs font-semibold text-gray-600 mb-1.5">Konfirmasi Password Baru</label>
-                        <input type="password" name="password_confirmation" id="password_confirmation" required minlength="8"
-                               class="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 text-xs transition"
-                               placeholder="Ketik ulang password baru...">
-                    </div>
+                <button type="button" onclick="closeResetModal()" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="bg-white px-6 py-5 space-y-4">
+                <!-- New Password -->
+                <div>
+                    <label for="password" class="block text-xs font-semibold text-gray-700 mb-1.5">Password Baru</label>
+                    <input type="password" name="password" id="password" required minlength="8"
+                           class="w-full px-3.5 py-2 bg-white border border-gray-250 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-xs transition shadow-xs"
+                           placeholder="Min 8 karakter...">
                 </div>
-                <div class="bg-gray-50 px-5 py-3.5 flex items-center justify-end gap-2 border-t border-gray-150">
-                    <button type="button" onclick="closeResetModal()"
-                            class="px-4 py-1.5 border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 font-bold rounded-lg text-xs transition">
-                        Batal
-                    </button>
-                    <button type="submit" 
-                            class="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs shadow-xs transition cursor-pointer">
-                        Reset Password
-                    </button>
+                <!-- Confirm Password -->
+                <div>
+                    <label for="password_confirmation" class="block text-xs font-semibold text-gray-700 mb-1.5">Konfirmasi Password Baru</label>
+                    <input type="password" name="password_confirmation" id="password_confirmation" required minlength="8"
+                           class="w-full px-3.5 py-2 bg-white border border-gray-250 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-xs transition shadow-xs"
+                           placeholder="Ketik ulang password baru...">
                 </div>
-            </form>
-        </div>
+            </div>
+            <div class="bg-gray-50/80 px-6 py-3.5 flex items-center justify-end gap-2.5 border-t border-gray-100">
+                <button type="button" onclick="closeResetModal()"
+                        class="px-4 py-2 border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 font-semibold rounded-lg text-xs transition shadow-xs cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit" 
+                        class="px-4.5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs shadow-xs hover:shadow-sm transition cursor-pointer">
+                    Reset Password
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -200,11 +202,13 @@
         form.action = `/admin/manager/${managerId}/reset-password`;
         
         modal.classList.remove('hidden');
+        modal.classList.add('flex');
     }
 
     function closeResetModal() {
         const modal = document.getElementById('resetPasswordModal');
         modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
 </script>
 @endsection

@@ -10,10 +10,10 @@
 
 <body class="bg-gray-50 text-gray-800 antialiased font-sans">
 
-<div class="min-h-screen flex flex-col md:flex-row">
+<div class="h-screen flex flex-col md:flex-row overflow-hidden bg-gray-50">
 
     <!-- Mobile Top Navigation Bar -->
-    <header class="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+    <header class="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30 flex-shrink-0">
         <div class="flex items-center gap-3">
             <button onclick="toggleAdminSidebar()" class="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all focus:outline-none">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -34,10 +34,10 @@
     <div id="admin-sidebar-backdrop" onclick="closeAdminSidebar()" class="fixed inset-0 bg-black/40 z-40 hidden md:hidden transition-opacity duration-300 opacity-0"></div>
 
     <!-- Sidebar Container -->
-    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 w-60 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out md:static md:translate-x-0 h-screen sticky top-0 shadow-xs">
+    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 w-60 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out md:static md:translate-x-0 h-full flex-shrink-0 shadow-xs">
         
         <!-- Sidebar Brand Logo -->
-        <div class="border-b border-gray-150 px-4 py-3 flex items-center justify-between">
+        <div class="border-b border-gray-150 px-4 py-3 flex items-center justify-between flex-shrink-0">
             <div class="flex items-center gap-2.5">
                 <img src="{{ asset('images/logo.jpg') }}" alt="Logo KopDes" class="w-8 h-8 rounded-lg object-cover shadow-xs">
                 <div>
@@ -99,6 +99,7 @@
                 <span>Transaksi</span>
             </a>
 
+
             <a href="{{ route('admin.laporan') }}"
                 class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all duration-150
                 {{ request()->routeIs('admin.laporan')
@@ -112,7 +113,7 @@
         </nav>
 
         <!-- Sidebar User Footer -->
-        <div class="border-t border-gray-150 p-3.5 space-y-3">
+        <div class="border-t border-gray-150 p-3.5 space-y-3 flex-shrink-0">
             <div class="flex items-center gap-2.5">
                 <div class="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-sm shadow-xs">
                     {{ strtoupper(substr(Auth::user()->nama, 0, 1)) }}
@@ -136,10 +137,10 @@
     </aside>
 
     <!-- Main Content wrapper -->
-    <div class="flex-1 flex flex-col min-w-0">
+    <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
 
         <!-- Top Header for Desktop -->
-        <header class="hidden md:flex bg-white border-b border-gray-200 px-6 py-3.5 justify-between items-center sticky top-0 z-20">
+        <header class="hidden md:flex bg-white border-b border-gray-200 px-6 py-3.5 justify-between items-center flex-shrink-0 z-20">
             <div>
                 <h2 class="text-lg font-bold text-gray-800 leading-tight">
                     @yield('title')
