@@ -69,7 +69,7 @@
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="px-6 py-4 font-semibold text-gray-900">{{ $trx->kode_transaksi }}</td>
                             <td class="px-6 py-4">
-                                <div class="font-medium text-gray-800">{{ $trx->user->name ?? 'Guest' }}</div>
+                                <div class="font-medium text-gray-800">{{ $trx->user->nama ?? $trx->user->name ?? 'Guest' }}</div>
                                 <div class="text-gray-400 text-[10px]">{{ $trx->user->email ?? '-' }}</div>
                             </td>
                             <td class="px-6 py-4">

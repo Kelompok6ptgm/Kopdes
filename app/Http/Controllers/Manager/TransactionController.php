@@ -35,25 +35,6 @@ class TransactionController extends Controller
         return view('admin.transaksi.index', compact('transactions'));
     }
 
-    /**
-     * Display a listing of payments for Admin/Manager.
-     */
-    public function payments()
-    {
-        $user = Auth::user();
-
-        if ($user->id_role == 1) {
-            $payments = Payment::with(['transaction.user', 'transaction.kopdes'])->latest()->get();
-        } elseif ($user->id_role == 2) {
-            $payments = Payment::whereHas('transaction', function ($q) use ($user) {
-                $q->where('id_kopdes', $user->id_kopdes);
-            })->with(['transaction.user'])->latest()->get();
-        } else {
-            abort(403, 'Unauthorized.');
-        }
-
-        return view('admin.pembayaran.index', compact('payments'));
-    }
 
     /**
      * Display transaction reports for Admin/Manager.

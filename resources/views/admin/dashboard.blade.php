@@ -88,7 +88,7 @@
                     <tr>
                         <th class="px-4 py-2.5">Invoice</th>
                         <th class="px-4 py-2.5">KopDes</th>
-                        <th class="px-4 py-2.5">Manager</th>
+                        <th class="px-4 py-2.5">Pembeli</th>
                         <th class="px-4 py-2.5">Total</th>
                         <th class="px-4 py-2.5">Status</th>
                     </tr>
@@ -96,24 +96,36 @@
                 <tbody class="divide-y divide-gray-150 bg-white text-xs text-gray-600">
                     @forelse($latestTransactions as $tx)
                     <tr class="hover:bg-gray-50/75 transition-colors">
-                        <td class="px-4 py-2.5 font-semibold text-gray-800">{{ $tx->invoice }}</td>
-                        <td class="px-4 py-2.5">{{ $tx->kopdes->nama_kopdes ?? '-' }}</td>
-                        <td class="px-4 py-2.5">{{ $tx->user->nama ?? '-' }}</td>
-                        <td class="px-4 py-2.5 font-bold text-gray-800">Rp{{ number_format($tx->total, 0, ',', '.') }}</td>
+                        <td class="px-4 py-2.5 font-bold text-gray-800">
+                            {{ $tx->kode_transaksi ?? $tx->invoice ?? ('#' . $tx->id_transaction) }}
+                        </td>
+                        <td class="px-4 py-2.5 font-medium text-gray-700">
+                            {{ $tx->kopdes->nama_kopdes ?? '-' }}
+                        </td>
+                        <td class="px-4 py-2.5 text-gray-600">
+                            {{ $tx->user->nama ?? $tx->user->name ?? '-' }}
+                        </td>
+                        <td class="px-4 py-2.5 font-bold text-gray-900">
+                            Rp{{ number_format($tx->total_harga ?? $tx->total ?? 0, 0, ',', '.') }}
+                        </td>
                         <td class="px-4 py-2.5">
-                            @if($tx->status === 'selesai')
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-green-50 text-green-700 border border-green-150">
-                                Selesai
+                            @php
+                                $status = $tx->status_transaksi ?? $tx->status ?? 'menunggu';
+                                $statusClasses = [
+                                    'selesai'             => 'bg-green-50 text-green-700 border-green-200',
+                                    'diproses'            => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                                    'dikirim'             => 'bg-purple-50 text-purple-700 border-purple-200',
+                                    'menunggu_verifikasi' => 'bg-blue-50 text-blue-700 border-blue-200',
+                                    'menunggu_pembayaran' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
+                                    'pending'             => 'bg-yellow-50 text-yellow-700 border-yellow-200',
+                                    'dibatalkan'          => 'bg-red-50 text-red-700 border-red-200',
+                                ];
+                                $badgeClass = $statusClasses[$status] ?? 'bg-gray-50 text-gray-700 border-gray-200';
+                                $badgeLabel = ucfirst(str_replace('_', ' ', $status));
+                            @endphp
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border {{ $badgeClass }}">
+                                {{ $badgeLabel }}
                             </span>
-                            @elseif($tx->status === 'pending')
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-yellow-50 text-yellow-700 border border-yellow-150">
-                                Pending
-                            </span>
-                            @else
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-50 text-red-700 border border-red-150">
-                                {{ ucfirst($tx->status) }}
-                            </span>
-                            @endif
                         </td>
                     </tr>
                     @empty
