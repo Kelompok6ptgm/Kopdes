@@ -135,6 +135,9 @@ class CartController extends Controller
             'quantity' => ['required', 'integer', 'min:1'],
         ]);
 
+        $productId = $request->id_product;
+        $qty = $request->quantity;
+
         $product = Product::with('kopdes')->findOrFail($productId);
 
         if (!$product->kopdes || $product->kopdes->status !== 'aktif') {

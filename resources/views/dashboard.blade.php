@@ -359,23 +359,24 @@
             <!-- Main Panel -->
             <main class="flex-1 ml-0 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 w-full overflow-x-hidden">
                 @if (!$hasKopdes)
-                    <div class="bg-yellow-50 text-yellow-800 p-6 rounded-xl border border-yellow-100 shadow-xs">
+                    <div class="bg-yellow-50 text-yellow-800 p-6 rounded-xl border border-yellow-100 shadow-xs mb-8">
                         <h2 class="font-bold text-lg">Penempatan KopDes Belum Ditugaskan</h2>
                         <p class="text-xs md:text-sm mt-1">Anda belum ditugaskan untuk mengelola Koperasi Desa manapun oleh Administrator.</p>
                     </div>
-                @else
-                    <!-- Header -->
-                    <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-gray-200 mb-8 gap-4">
-                        <div>
-                            <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ $kopdes->nama_kopdes }}</h1>
-                            <p class="text-xs md:text-sm text-gray-500">Alamat: {{ $kopdes->alamat }} (Kode Pos: {{ $kopdes->kode_pos ?? '-' }})</p>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full">Manager: {{ $user->nama }}</span>
-                        </div>
-                    </header>
+                @endif
 
-                    <!-- SECTION: OVERVIEW -->
+                <!-- Header -->
+                <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-gray-200 mb-8 gap-4">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ $kopdes->nama_kopdes ?? 'Manager' }}</h1>
+                        <p class="text-xs md:text-sm text-gray-500">Alamat: {{ $kopdes->alamat ?? '-' }} (Kode Pos: {{ $kopdes->kode_pos ?? '-' }})</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full">Manager: {{ $user->nama }}</span>
+                    </div>
+                </header>
+
+                <!-- SECTION: OVERVIEW -->
                     <section id="mgr-overview" class="tab-content space-y-8">
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
                             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
@@ -640,7 +641,7 @@
                                             <td class="p-4 text-gray-500 uppercase text-xs font-semibold">{{ $pay->metode_pembayaran }}</td>
                                             <td class="p-4">
                                                 @if ($pay->bukti_pembayaran)
-                                                    <a href="{{ asset('storage/' . $pay->bukti_pembayaran) }}" target="_blank" class="text-blue-600 hover:underline text-xs font-semibold flex items-center">
+                                                    <a href="{{ route('payment-proof', basename($pay->bukti_pembayaran)) }}" target="_blank" class="text-blue-600 hover:underline text-xs font-semibold flex items-center">
                                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                                         Lihat Bukti
                                                     </a>
@@ -751,7 +752,7 @@
                                             <td class="p-4 text-gray-600">{{ $mb->kode_pos }}</td>
                                             <td class="p-4">
                                                 @if ($mb->reset_requested)
-                                                    <form action="{{ route('manager.reset-password', $mb->id_user) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui reset password anggota ini menjadi kopdes123?')" class="inline">
+                                                    <form action="{{ route('manager.member.reset-password', $mb->id_user) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui reset password anggota ini menjadi kopdes123?')" class="inline">
                                                         @csrf
                                                         <button type="submit" class="bg-[#c52228] hover:bg-[#a51c21] text-white shadow-xs px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer">
                                                             Setujui Reset
@@ -771,7 +772,6 @@
                             </table>
                         </div>
                     </section>
-                @endif
             </main>
         </div>
     @endif
@@ -1007,9 +1007,9 @@
                                 @else
                                     <span class="text-gray-400 text-xs font-bold uppercase tracking-wider">{{ $p->nama_produk }}</span>
                                 @endif
-                                <button onclick="openDetailModal({{ $p->id_product }}, '{{ $p->nama_produk }}', '{{ number_format($p->harga, 0, ',', '.') }}', '{{ $p->stok }}', '{{ $p->deskripsi }}', '{{ $p->category->nama_kategori ?? 'Umum' }}')" class="absolute inset-0 bg-black/40 text-white font-bold text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-xs cursor-pointer">
+                                <a href="{{ route('product.show', $p->id_product) }}" class="absolute inset-0 bg-black/40 text-white font-bold text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-xs cursor-pointer">
                                     Detail Produk
-                                </button>
+                                </a>
                             </div>
                             <div>
                                 <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{{ $p->category->nama_kategori ?? 'Umum' }}</span>
@@ -1038,8 +1038,16 @@
 
             <!-- SECTION 3: KERANJANG BELANJA -->
             <section id="user-carts" class="tab-content-top hidden space-y-6">
-                <h3 class="font-bold text-lg md:text-xl text-gray-900">Keranjang Belanja Anda</h3>
-                
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <h3 class="font-bold text-lg md:text-xl text-gray-900">Keranjang Belanja Anda</h3>
+                    @if(isset($myCarts) && $myCarts->isNotEmpty())
+                        <label class="flex items-center gap-2 text-xs font-semibold text-gray-600 cursor-pointer select-none">
+                            <input type="checkbox" id="cart-select-all" onchange="toggleSelectAll(this)" class="rounded border-gray-300 text-[#c52228] w-4 h-4 cursor-pointer">
+                            Pilih Semua
+                        </label>
+                    @endif
+                </div>
+
                 @if (session('success') && Auth::check() && Auth::user()->id_role == 3)
                     <div class="bg-green-50 text-green-700 p-4 rounded-xl text-sm border border-green-100 font-semibold shadow-xs">
                         {{ session('success') }}
@@ -1058,9 +1066,20 @@
                     <div class="md:col-span-2 space-y-4">
                         @php $cartTotal = 0; @endphp
                         @forelse ($myCarts as $c)
-                            @php $cartTotal += $c->product->harga * $c->quantity; @endphp
-                            <div id="cart-item-{{ $c->product->id_product }}" class="bg-white rounded-xl border border-gray-200 p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div class="flex items-center space-x-4">
+                            @php
+                                $cartTotal += $c->product->harga * $c->quantity;
+                                $itemId = $c->product->id_product;
+                                $itemSubtotal = $c->product->harga * $c->quantity;
+                            @endphp
+                            <div id="cart-item-{{ $itemId }}" class="bg-white rounded-xl border border-gray-200 p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <!-- Checkbox -->
+                                <input type="checkbox"
+                                    class="cart-item-checkbox w-5 h-5 rounded border-gray-300 text-[#c52228] cursor-pointer flex-shrink-0"
+                                    data-product-id="{{ $itemId }}"
+                                    data-subtotal="{{ $itemSubtotal }}"
+                                    onchange="updateSelectedSummary()">
+
+                                <div class="flex items-center space-x-4 flex-1 min-w-0">
                                     <div class="w-12 h-12 md:w-16 md:h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                                         @if ($c->product->gambar)
                                             <img src="{{ asset($c->product->gambar) }}" alt="Gambar" class="w-full h-full object-cover">
@@ -1068,23 +1087,23 @@
                                             <span class="text-gray-400 text-[10px] font-bold uppercase">{{ substr($c->product->nama_produk, 0, 3) }}</span>
                                         @endif
                                     </div>
-                                    <div>
-                                        <h4 class="font-bold text-sm text-gray-900">{{ $c->product->nama_produk }}</h4>
+                                    <div class="min-w-0">
+                                        <h4 class="font-bold text-sm text-gray-900 truncate">{{ $c->product->nama_produk }}</h4>
                                         <span class="text-xs text-gray-400 block mt-0.5">Rp {{ number_format($c->product->harga, 0, ',', '.') }}</span>
                                     </div>
                                 </div>
                                 <div class="flex items-center justify-between sm:justify-end space-x-6">
                                     <!-- Quantity Selector -->
                                     <div class="flex items-center border border-gray-200 rounded-lg bg-gray-50 overflow-hidden">
-                                        <button onclick="decrementQty({{ $c->product->id_product }})" class="px-2.5 py-1 text-gray-500 hover:bg-gray-100 font-bold text-xs cursor-pointer">-</button>
-                                        <input type="text" id="qty-input-{{ $c->product->id_product }}" value="{{ $c->quantity }}" readonly class="w-8 text-center text-xs font-bold bg-transparent border-none outline-none">
-                                        <button onclick="incrementQty({{ $c->product->id_product }}, {{ $c->product->stok }})" class="px-2.5 py-1 text-gray-500 hover:bg-gray-100 font-bold text-xs cursor-pointer">+</button>
+                                        <button onclick="decrementQty({{ $itemId }})" class="px-2.5 py-1 text-gray-500 hover:bg-gray-100 font-bold text-xs cursor-pointer">-</button>
+                                        <input type="text" id="qty-input-{{ $itemId }}" value="{{ $c->quantity }}" readonly class="w-8 text-center text-xs font-bold bg-transparent border-none outline-none">
+                                        <button onclick="incrementQty({{ $itemId }}, {{ $c->product->stok }})" class="px-2.5 py-1 text-gray-500 hover:bg-gray-100 font-bold text-xs cursor-pointer">+</button>
                                     </div>
                                     <!-- Item Subtotal -->
-                                    <span id="subtotal-{{ $c->product->id_product }}" class="font-bold text-sm text-gray-900 w-24 text-right">
-                                        Rp {{ number_format($c->product->harga * $c->quantity, 0, ',', '.') }}
+                                    <span id="subtotal-{{ $itemId }}" class="font-bold text-sm text-gray-900 w-24 text-right">
+                                        Rp {{ number_format($itemSubtotal, 0, ',', '.') }}
                                     </span>
-                                    <button onclick="removeItemFromCart({{ $c->product->id_product }})" class="text-red-600 hover:text-red-800 text-xs font-bold transition-all cursor-pointer">
+                                    <button onclick="removeItemFromCart({{ $itemId }})" class="text-red-600 hover:text-red-800 text-xs font-bold transition-all cursor-pointer">
                                         Hapus
                                     </button>
                                 </div>
@@ -1099,15 +1118,24 @@
                     <!-- Right: Summary Card -->
                     <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-xs h-fit space-y-6">
                         <h4 class="font-bold text-base md:text-lg text-gray-900">Ringkasan Belanja</h4>
-                        <div class="flex justify-between text-sm pt-2 border-t border-gray-100">
-                            <span class="text-gray-500 font-medium">Total Harga</span>
-                            <span id="cart-total-price" class="font-extrabold text-lg text-[#c52228]">Rp {{ number_format($cartTotal, 0, ',', '.') }}</span>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>Dipilih</span>
+                                <span id="selected-count-label">0 barang</span>
+                            </div>
+                            <div class="flex justify-between text-sm pt-2 border-t border-gray-100">
+                                <span class="text-gray-500 font-medium">Total Dipilih</span>
+                                <span id="selected-total-price" class="font-extrabold text-lg text-[#c52228]">Rp 0</span>
+                            </div>
                         </div>
-                        
+
                         @if ($roleName === 'user')
                             @if ($myCarts->isNotEmpty())
-                                <button onclick="openCheckoutModal()" class="w-full bg-[#c52228] hover:bg-[#a51c21] text-white py-2.5 rounded-xl font-bold text-sm shadow-xs transition-all cursor-pointer">
-                                    Checkout Sekarang
+                                <button id="checkout-btn" onclick="openCheckoutModal()" disabled
+                                    class="w-full bg-gray-200 text-gray-400 py-2.5 rounded-xl font-bold text-sm cursor-not-allowed transition-all select-none"
+                                    data-active-class="bg-[#c52228] hover:bg-[#a51c21] text-white cursor-pointer"
+                                    data-inactive-class="bg-gray-200 text-gray-400 cursor-not-allowed">
+                                    Checkout Barang Dipilih
                                 </button>
                             @else
                                 <button disabled class="w-full bg-gray-100 text-gray-400 py-2.5 rounded-xl font-bold text-sm cursor-not-allowed select-none">
@@ -1139,7 +1167,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-150 text-sm">
                             @forelse ($myHistory as $h)
-                                <tr>
+                                <tr class="hover:bg-gray-50/50">
                                     <td class="p-4 font-semibold text-gray-900">{{ $h->kode_transaksi }}</td>
                                     <td class="p-4 text-gray-600">{{ $h->kopdes->nama_kopdes ?? 'N/A' }}</td>
                                     <td class="p-4 font-bold text-gray-900">Rp {{ number_format($h->total_harga, 0, ',', '.') }}</td>
@@ -1150,19 +1178,27 @@
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 uppercase">Menunggu Verifikasi</span>
                                         @elseif ($h->status_transaksi === 'diproses')
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 uppercase">Diproses</span>
+                                        @elseif ($h->status_transaksi === 'dikirim')
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200 uppercase">Dikirim</span>
                                         @elseif ($h->status_transaksi === 'dibatalkan')
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200 uppercase">Dibatalkan</span>
                                         @else
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200 uppercase">{{ $h->status_transaksi }}</span>
                                         @endif
                                     </td>
-                                    <td class="p-4 text-right space-x-2">
+                                    <td class="p-4 text-right space-x-2 whitespace-nowrap">
+                                        {{-- Tombol Detail: toggle expand row --}}
+                                        <button onclick="toggleTrxDetail('trx-detail-{{ $h->id_transaction }}')"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer">
+                                            Detail ▾
+                                        </button>
+
                                         @if ($h->status_transaksi === 'menunggu_pembayaran')
                                             <button onclick="openPaymentModal({{ $h->id_transaction }}, '{{ number_format($h->total_harga, 0, ',', '.') }}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer">
                                                 Bayar
                                             </button>
                                         @endif
-                                        
+
                                         @if ($h->status_transaksi === 'menunggu_pembayaran' || $h->status_transaksi === 'menunggu_verifikasi')
                                             <form action="{{ route('transaction.cancel', $h->id_transaction) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan ini? Stok akan dikembalikan.')">
                                                 @csrf
@@ -1179,6 +1215,71 @@
                                         @endif
                                     </td>
                                 </tr>
+                                {{-- Expandable Detail Row --}}
+                                <tr id="trx-detail-{{ $h->id_transaction }}" class="hidden bg-gray-50/70">
+                                    <td colspan="5" class="px-6 py-4 border-t border-dashed border-gray-200">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {{-- Daftar Barang --}}
+                                            <div>
+                                                <h5 class="text-xs font-bold text-gray-500 uppercase mb-3">Barang yang Dibeli</h5>
+                                                <div class="space-y-2">
+                                                    @foreach ($h->details as $d)
+                                                        <div class="flex items-center justify-between bg-white rounded-lg border border-gray-100 p-3">
+                                                            <div class="flex items-center space-x-3">
+                                                                <div class="w-8 h-8 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                                                    @if ($d->product->gambar)
+                                                                        <img src="{{ asset($d->product->gambar) }}" alt="" class="w-full h-full object-cover">
+                                                                    @else
+                                                                        <div class="w-full h-full flex items-center justify-center text-gray-400 text-[10px] font-bold">{{ substr($d->product->nama_produk, 0, 2) }}</div>
+                                                                    @endif
+                                                                </div>
+                                                                <div>
+                                                                    <p class="text-xs font-semibold text-gray-900">{{ $d->product->nama_produk }}</p>
+                                                                    <p class="text-[10px] text-gray-400">{{ $d->quantity }} × Rp {{ number_format($d->harga_beli, 0, ',', '.') }}</p>
+                                                                </div>
+                                                            </div>
+                                                            <span class="text-xs font-bold text-gray-800">Rp {{ number_format($d->harga_beli * $d->quantity, 0, ',', '.') }}</span>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                            {{-- Info Pengiriman --}}
+                                            <div class="space-y-3">
+                                                <h5 class="text-xs font-bold text-gray-500 uppercase">Info Pesanan</h5>
+                                                <div class="bg-white rounded-lg border border-gray-100 p-4 space-y-2 text-xs">
+                                                    <div class="flex justify-between">
+                                                        <span class="text-gray-500">Kode Transaksi</span>
+                                                        <span class="font-bold text-gray-900">{{ $h->kode_transaksi }}</span>
+                                                    </div>
+                                                    <div class="flex justify-between">
+                                                        <span class="text-gray-500">Tanggal Order</span>
+                                                        <span class="font-semibold text-gray-700">{{ $h->created_at->format('d M Y, H:i') }}</span>
+                                                    </div>
+                                                    <div class="flex justify-between">
+                                                        <span class="text-gray-500">Total Bayar</span>
+                                                        <span class="font-bold text-[#c52228]">Rp {{ number_format($h->total_harga, 0, ',', '.') }}</span>
+                                                    </div>
+                                                    @if ($h->payment)
+                                                        <div class="flex justify-between">
+                                                            <span class="text-gray-500">Metode</span>
+                                                            <span class="font-semibold text-gray-700 uppercase">{{ $h->payment->metode_pembayaran }}</span>
+                                                        </div>
+                                                    @endif
+                                                    <div class="pt-2 border-t border-gray-100">
+                                                        <span class="text-gray-500 block mb-1">Alamat Pengiriman</span>
+                                                        <span class="text-gray-700 font-semibold">{{ $h->alamat_pengiriman }}</span>
+                                                    </div>
+                                                    @if ($h->catatan)
+                                                        <div>
+                                                            <span class="text-gray-500 block mb-1">Catatan</span>
+                                                            <span class="text-gray-700 italic">{{ $h->catatan }}</span>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
                             @empty
                                 <tr><td colspan="5" class="p-8 text-center text-gray-400 text-sm">Belum ada riwayat belanja.</td></tr>
                             @endforelse
@@ -1186,6 +1287,7 @@
                     </table>
                 </div>
             </section>
+
 
             <!-- SECTION 5: PROFIL SAYA -->
             @if ($user)
@@ -1258,35 +1360,6 @@
             @endif
         </main>
 
-        <!-- Detail Barang Modal -->
-        <div id="detail-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4">
-            <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
-                <button onclick="closeDetailModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg font-bold">✕</button>
-                <div>
-                    <span id="modal-category" class="text-[10px] uppercase font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full"></span>
-                    <h3 id="modal-title" class="text-lg md:text-xl font-bold text-gray-900 mt-2"></h3>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-xl space-y-2 border border-gray-100 text-xs md:text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-500 font-medium">Harga:</span>
-                        <span id="modal-price" class="font-bold text-[#c52228] text-base"></span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500 font-medium">Stok:</span>
-                        <span id="modal-stock" class="font-bold text-gray-900"></span>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Deskripsi Produk</h4>
-                    <p id="modal-desc" class="text-xs md:text-sm text-gray-600 leading-relaxed"></p>
-                </div>
-                <div class="pt-4 border-t border-gray-100 flex space-x-3">
-                    <button onclick="closeDetailModal()" class="w-1/2 bg-gray-100 text-gray-700 font-bold py-2 rounded-xl text-xs md:text-sm">Tutup</button>
-                    <button id="modal-buy-btn" class="w-1/2 bg-[#c52228] text-white font-bold py-2 rounded-xl text-xs md:text-sm shadow-xs">+ Beli</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Checkout Modal -->
         <div id="checkout-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4">
             <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
@@ -1295,8 +1368,12 @@
                     <h3 class="text-lg md:text-xl font-bold text-gray-900">Konfirmasi Pesanan</h3>
                     <p class="text-xs text-gray-500 mt-1">Lengkapi alamat pengiriman dan catatan untuk membuat pesanan Anda.</p>
                 </div>
+                <!-- Selected items summary shown here dynamically -->
+                <div id="checkout-items-summary" class="bg-gray-50 rounded-xl p-3 border border-gray-100 text-xs text-gray-600 space-y-1"></div>
                 <form id="checkout-form" action="{{ route('checkout') }}" method="POST" class="space-y-4" onsubmit="disableSubmitButton(this)">
                     @csrf
+                    <!-- Hidden inputs for selected product IDs, injected by JS -->
+                    <div id="checkout-selected-inputs"></div>
                     <div>
                         <label for="checkout-alamat" class="block text-xs font-bold text-gray-600 uppercase mb-1">Alamat Pengiriman</label>
                         <textarea id="checkout-alamat" name="alamat_pengiriman" required rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-red-500 bg-gray-50">{{ $user ? $user->alamat : '' }}</textarea>
@@ -1480,56 +1557,95 @@
             });
         }
 
-        function openDetailModal(idProduct, title, price, stock, desc, category) {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-price').innerText = 'Rp ' + price;
-            document.getElementById('modal-stock').innerText = stock + ' pcs';
-            document.getElementById('modal-desc').innerText = desc || 'Tidak ada deskripsi.';
-            document.getElementById('modal-category').innerText = category;
-
-            const buyBtn = document.getElementById('modal-buy-btn');
-            if (buyBtn) {
-                const stockInt = parseInt(stock) || 0;
-                if (stockInt > 0) {
-                    buyBtn.disabled = false;
-                    buyBtn.innerText = '+ Beli';
-                    buyBtn.className = 'w-1/2 bg-[#c52228] text-white font-bold py-2 rounded-xl text-xs md:text-sm shadow-xs cursor-pointer hover:bg-[#a51c21]';
-                    buyBtn.onclick = function() {
-                        addItemToCart(idProduct);
-                        closeDetailModal();
-                    };
-                } else {
-                    buyBtn.disabled = true;
-                    buyBtn.innerText = 'Stok Habis';
-                    buyBtn.className = 'w-1/2 bg-gray-200 text-gray-400 font-bold py-2 rounded-xl text-xs md:text-sm cursor-not-allowed';
-                    buyBtn.onclick = null;
-                }
-            }
-
-            const modal = document.getElementById('detail-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeDetailModal() {
-            const modal = document.getElementById('detail-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
         function openCheckoutModal() {
+            const checkboxes = document.querySelectorAll('.cart-item-checkbox:checked');
+            if (checkboxes.length === 0) return; // button should be disabled, guard anyway
+
+            // Inject hidden inputs
+            const inputContainer = document.getElementById('checkout-selected-inputs');
+            inputContainer.innerHTML = '';
+            checkboxes.forEach(cb => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'selected_products[]';
+                input.value = cb.dataset.productId;
+                inputContainer.appendChild(input);
+            });
+
+            // Build summary list
+            const summary = document.getElementById('checkout-items-summary');
+            summary.innerHTML = '';
+            let totalSelected = 0;
+            checkboxes.forEach(cb => {
+                const productId = cb.dataset.productId;
+                const subtotal = parseInt(cb.dataset.subtotal) || 0;
+                totalSelected += subtotal;
+                const nameEl = document.querySelector(`#cart-item-${productId} h4`);
+                const qtyEl = document.getElementById(`qty-input-${productId}`);
+                const name = nameEl ? nameEl.textContent.trim() : '?';
+                const qty = qtyEl ? qtyEl.value : '?';
+                const row = document.createElement('div');
+                row.className = 'flex justify-between';
+                row.innerHTML = `<span class="truncate max-w-[60%]">${name} ×${qty}</span><span class="font-semibold">Rp ${subtotal.toLocaleString('id-ID')}</span>`;
+                summary.appendChild(row);
+            });
+            const totalRow = document.createElement('div');
+            totalRow.className = 'flex justify-between font-bold border-t border-gray-200 pt-1 mt-1';
+            totalRow.innerHTML = `<span>Total</span><span class="text-[#c52228]">Rp ${totalSelected.toLocaleString('id-ID')}</span>`;
+            summary.appendChild(totalRow);
+
             const modal = document.getElementById('checkout-modal');
             if (modal) {
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
             }
         }
-        
+
         function closeCheckoutModal() {
             const modal = document.getElementById('checkout-modal');
             if (modal) {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
+            }
+        }
+
+        function toggleSelectAll(selectAllCb) {
+            document.querySelectorAll('.cart-item-checkbox').forEach(cb => {
+                cb.checked = selectAllCb.checked;
+            });
+            updateSelectedSummary();
+        }
+
+        function updateSelectedSummary() {
+            const checkboxes = document.querySelectorAll('.cart-item-checkbox');
+            const checked = document.querySelectorAll('.cart-item-checkbox:checked');
+
+            let total = 0;
+            checked.forEach(cb => { total += parseInt(cb.dataset.subtotal) || 0; });
+
+            const countLabel = document.getElementById('selected-count-label');
+            const totalLabel = document.getElementById('selected-total-price');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const selectAll = document.getElementById('cart-select-all');
+
+            if (countLabel) countLabel.textContent = checked.length + ' barang';
+            if (totalLabel) totalLabel.textContent = 'Rp ' + total.toLocaleString('id-ID');
+
+            // Update select-all indeterminate state
+            if (selectAll) {
+                selectAll.indeterminate = checked.length > 0 && checked.length < checkboxes.length;
+                selectAll.checked = checked.length === checkboxes.length && checkboxes.length > 0;
+            }
+
+            // Toggle checkout button
+            if (checkoutBtn) {
+                if (checked.length > 0) {
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.className = 'w-full bg-[#c52228] hover:bg-[#a51c21] text-white py-2.5 rounded-xl font-bold text-sm shadow-xs transition-all cursor-pointer';
+                } else {
+                    checkoutBtn.disabled = true;
+                    checkoutBtn.className = 'w-full bg-gray-200 text-gray-400 py-2.5 rounded-xl font-bold text-sm cursor-not-allowed transition-all select-none';
+                }
             }
         }
 
@@ -1612,8 +1728,24 @@
                 },
                 body: JSON.stringify({ id_product: productId, quantity: 1 })
             })
-            .then(res => res.json())
+            .then(res => {
+                // If server redirected to login (response URL changed), handle gracefully
+                if (res.redirected && res.url.includes('/login')) {
+                    showToast('Sesi habis. Silakan login kembali.', 'error');
+                    setTimeout(() => window.location.href = res.url, 1200);
+                    return null;
+                }
+                // Guard against non-JSON response (e.g. session expired without redirect flag)
+                const contentType = res.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    showToast('Sesi habis. Silakan login kembali.', 'error');
+                    setTimeout(() => window.location.href = '/login', 1200);
+                    return null;
+                }
+                return res.json();
+            })
             .then(data => {
+                if (!data) return;
                 if (data.success) {
                     showToast(data.message, 'success');
                     updateCartBadge(data.cart_count);
@@ -1622,7 +1754,7 @@
                     showToast(data.message || 'Gagal menambahkan barang.', 'error');
                 }
             })
-            .catch(err => {
+            .catch(() => {
                 showToast('Terjadi kesalahan koneksi.', 'error');
             });
         }
@@ -1644,7 +1776,86 @@
             } else {
                 switchTabTop('user-catalog');
             }
+
+            // Auto-detect user location and suggest nearest kopdes
+            detectAndSuggestKopdes();
         });
+
+        function detectAndSuggestKopdes() {
+            // Only run on storefront (kopdes-select exists), skip if already user selected
+            const selectEl = document.getElementById('kopdes-select-form');
+            if (!selectEl || !navigator.geolocation) return;
+            // Don't override if user manually chose a kopdes via query string
+            if (new URLSearchParams(window.location.search).has('kopdes_id')) return;
+
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                const { latitude, longitude } = pos.coords;
+                fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=id`)
+                    .then(r => r.json())
+                    .then(geo => {
+                        const addr = geo.address || {};
+                        // Nominatim fields: city/town/village = kota; suburb/city_district = kecamatan
+                        const detectedKota = (addr.city || addr.town || addr.village || '').toLowerCase();
+                        const detectedKecamatan = (addr.suburb || addr.city_district || addr.county || '').toLowerCase();
+
+                        // Match against kopdes data passed from PHP
+                        const kopdesData = @json($allActiveKopdes ?? []);
+                        if (!kopdesData.length) return;
+
+                        // Score: kota match = 2pts, kecamatan match = 3pts
+                        let best = null, bestScore = 0;
+                        kopdesData.forEach(kd => {
+                            let score = 0;
+                            const kota = (kd.kota || '').toLowerCase();
+                            const kecamatan = (kd.kecamatan || '').toLowerCase();
+                            if (detectedKota && kota && detectedKota.includes(kota)) score += 2;
+                            if (detectedKecamatan && kecamatan && detectedKecamatan.includes(kecamatan)) score += 3;
+                            if (score > bestScore) { bestScore = score; best = kd; }
+                        });
+
+                        if (!best || bestScore === 0) return;
+
+                        const currentSelect = document.querySelector('[name="kopdes_id"]');
+                        if (!currentSelect) return;
+                        const currentVal = currentSelect.value;
+
+                        // Already on the best kopdes — nothing to do
+                        if (String(currentVal) === String(best.id_kopdes)) return;
+
+                        // Show suggestion banner
+                        showKopdesSuggestion(best);
+                    })
+                    .catch(() => {}); // silent fail — geolocation is enhancement only
+            }, function() {}, { timeout: 8000 });
+        }
+
+        function showKopdesSuggestion(kopdes) {
+            const banner = document.createElement('div');
+            banner.id = 'geo-suggestion-banner';
+            banner.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-white border border-gray-200 rounded-2xl shadow-xl px-5 py-4 flex items-center gap-4 max-w-sm w-full mx-4';
+            banner.innerHTML = `
+                <div class="flex-1">
+                    <p class="text-xs font-bold text-gray-800">📍 Kopdes Terdekat Terdeteksi</p>
+                    <p class="text-xs text-gray-500 mt-0.5"><strong>${kopdes.nama_kopdes}</strong></p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="applyKopdesSuggestion(${kopdes.id_kopdes})" class="bg-[#c52228] hover:bg-[#a51c21] text-white text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer">Gunakan</button>
+                    <button onclick="document.getElementById('geo-suggestion-banner').remove()" class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer">Abaikan</button>
+                </div>
+            `;
+            document.body.appendChild(banner);
+            // Auto-dismiss after 12 seconds
+            setTimeout(() => banner.remove(), 12000);
+        }
+
+        function applyKopdesSuggestion(kopdesId) {
+            const form = document.getElementById('kopdes-select-form');
+            if (!form) return;
+            const select = form.querySelector('[name="kopdes_id"]');
+            if (select) select.value = kopdesId;
+            document.getElementById('geo-suggestion-banner')?.remove();
+            form.submit();
+        }
 
         function decrementQty(productId) {
             const input = document.getElementById('qty-input-' + productId);
@@ -1790,6 +2001,19 @@
                     img.classList.add('hidden');
                     fallback.classList.remove('hidden');
                 }
+            }
+        }
+
+        function toggleTrxDetail(rowId) {
+            const row = document.getElementById(rowId);
+            if (!row) return;
+            row.classList.toggle('hidden');
+            // Update button label ▾/▴
+            const btn = event.currentTarget;
+            if (row.classList.contains('hidden')) {
+                btn.textContent = 'Detail ▾';
+            } else {
+                btn.textContent = 'Detail ▴';
             }
         }
     </script>

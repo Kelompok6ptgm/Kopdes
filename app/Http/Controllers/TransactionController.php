@@ -8,48 +8,154 @@ use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\Payment;
 use App\Models\Product;
+use App\Models\Kopdes;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class TransactionController extends Controller
 {
     /**
-     * Handle cart checkout and create transaction (using DB transaction).
+     * Halaman Utama: Menampilkan Kartu/Card KopDes
+     */
+    public function index()
+    {
+        $user = Auth::user();
+
+        $kopdesQuery = Kopdes::query();
+
+        if ($user && $user->id_role == 2) {
+            $kopdesQuery->where('id_kopdes', $user->id_kopdes);
+        }
+
+        $kopdesList = $kopdesQuery->withCount('transactions')->get();
+
+        return view('admin.transaksi.index', compact('kopdesList'));
+    }
+
+    /**
+     * Halaman Detail: Menampilkan Laporan Keuangan & Transaksi Khusus 1 KopDes
+     */
+    public function show($id)
+    {
+        $user = Auth::user();
+
+        if ($user && $user->id_role == 2 && $user->id_kopdes != $id) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $kopdes = Kopdes::with([
+            'transactions' => function ($q) {
+                $q->with(['user', 'details.product'])->latest();
+            }
+        ])->findOrFail($id);
+
+        // Perhitungan Keuangan KopDes
+        $kopdes->total_pemasukan = $kopdes->transactions
+            ->whereIn('status_transaksi', ['diproses', 'dikirim', 'selesai'])
+            ->sum('total_harga');
+
+        $kopdes->total_pengeluaran = $kopdes->transactions
+            ->where('status_transaksi', 'dibatalkan')
+            ->sum('total_harga');
+
+        return view('admin.transaksi.show', compact('kopdes'));
+    }
+
+    /**
+     * Display a listing of payments for Admin/Manager.
+     */
+    public function payments()
+    {
+        $user = Auth::user();
+
+        if ($user->id_role == 1) {
+            $payments = Payment::with(['transaction.user', 'transaction.kopdes'])->latest()->get();
+        } elseif ($user->id_role == 2) {
+            $payments = Payment::whereHas('transaction', function ($q) use ($user) {
+                $q->where('id_kopdes', $user->id_kopdes);
+            })->with(['transaction.user'])->latest()->get();
+        } else {
+            abort(403, 'Unauthorized.');
+        }
+
+        return view('admin.pembayaran.index', compact('payments'));
+    }
+
+    /**
+     * Display transaction reports per KopDes per month.
+     */
+    public function reports(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!in_array($user->id_role, [1, 2])) {
+            abort(403, 'Unauthorized.');
+        }
+
+        $bulan = $request->input('bulan', date('m'));
+        $tahun = $request->input('tahun', date('Y'));
+
+        $kopdesQuery = Kopdes::query();
+
+        if ($user->id_role == 2) {
+            $kopdesQuery->where('id_kopdes', $user->id_kopdes);
+        }
+
+        $laporan = $kopdesQuery->with(['transactions' => function ($q) use ($bulan, $tahun) {
+            $q->whereMonth('created_at', $bulan)
+              ->whereYear('created_at', $tahun);
+        }])->get()->map(function ($kopdes) {
+            $transaksiBerhasil = $kopdes->transactions->whereIn('status_transaksi', ['diproses', 'dikirim', 'selesai']);
+            
+            $kopdes->total_transaksi = $kopdes->transactions->count();
+            $kopdes->transaksi_berhasil = $transaksiBerhasil->count();
+            $kopdes->total_pemasukan = $transaksiBerhasil->sum('total_harga');
+            
+            return $kopdes;
+        });
+
+        return view('admin.laporan.index', compact('laporan', 'bulan', 'tahun'));
+    }
+
+    /**
+     * Handle cart checkout and create transaction.
      */
     public function checkout(Request $request)
     {
         $request->validate([
-            'alamat_pengiriman' => ['required', 'string', 'max:500'],
-            'catatan' => ['nullable', 'string', 'max:500'],
+            'alamat_pengiriman'   => ['required', 'string', 'max:500'],
+            'catatan'             => ['nullable', 'string', 'max:500'],
+            'selected_products'   => ['required', 'array', 'min:1'],
+            'selected_products.*' => ['integer', 'exists:product,id_product'],
         ]);
 
         $user = Auth::user();
+        $selectedProductIds = $request->selected_products;
 
-        // Get user's cart items
-        $cartItems = Cart::where('id_user', $user->id_user)->with('product')->get();
+        $cartItems = Cart::where('id_user', $user->id_user)
+            ->whereIn('id_product', $selectedProductIds)
+            ->with('product')
+            ->get();
 
         if ($cartItems->isEmpty()) {
-            return back()->withErrors(['error' => 'Keranjang belanja Anda kosong.']);
+            return back()->withErrors(['error' => 'Tidak ada barang yang dipilih atau barang tidak ditemukan di keranjang.']);
         }
 
-        // Validate all cart items belong to the same KopDes (defense in depth after cart-level check)
         $kopdesIds = $cartItems->pluck('product.id_kopdes')->unique();
         if ($kopdesIds->count() > 1) {
-            return back()->withErrors(['error' => 'Keranjang berisi barang dari beberapa koperasi berbeda. Kosongkan keranjang dan coba lagi.']);
+            return back()->withErrors(['error' => 'Barang yang dipilih berasal dari beberapa koperasi berbeda. Pilih barang dari satu koperasi saja.']);
         }
         $idKopdes = $kopdesIds->first();
 
-        $kopdes = \App\Models\Kopdes::find($idKopdes);
+        $kopdes = Kopdes::find($idKopdes);
         if (!$kopdes || $kopdes->status !== 'aktif') {
             return back()->withErrors(['error' => 'Koperasi Desa asal barang ini sedang tidak aktif.']);
         }
 
         try {
-            $transaction = DB::transaction(function () use ($user, $cartItems, $idKopdes, $request) {
+            $transaction = DB::transaction(function () use ($user, $cartItems, $selectedProductIds, $idKopdes, $request) {
                 $totalHarga = 0;
 
-                // Validate stock in real-time before transaction
                 foreach ($cartItems as $item) {
                     $product = Product::lockForUpdate()->find($item->id_product);
                     if ($item->quantity > $product->stok) {
@@ -58,39 +164,37 @@ class TransactionController extends Controller
                     $totalHarga += $product->harga * $item->quantity;
                 }
 
-                // Create Transaction record
                 $trx = Transaction::create([
-                    'id_user' => $user->id_user,
-                    'id_kopdes' => $idKopdes,
-                    'kode_transaksi' => 'TRX-' . time() . '-' . rand(1000, 9999),
-                    'total_harga' => $totalHarga,
-                    'status_transaksi' => 'menunggu_pembayaran',
+                    'id_user'           => $user->id_user,
+                    'id_kopdes'         => $idKopdes,
+                    'kode_transaksi'    => 'TRX-' . time() . '-' . rand(1000, 9999),
+                    'total_harga'       => $totalHarga,
+                    'status_transaksi'  => 'menunggu_pembayaran',
                     'alamat_pengiriman' => $request->alamat_pengiriman,
-                    'catatan' => $request->catatan,
+                    'catatan'           => $request->catatan,
                 ]);
 
-                // Create TransactionDetails & Deduct Stock
                 foreach ($cartItems as $item) {
                     $product = Product::find($item->id_product);
-                    
+
                     TransactionDetail::create([
                         'id_transaction' => $trx->id_transaction,
-                        'id_product' => $item->id_product,
-                        'quantity' => $item->quantity,
-                        'harga_beli' => $product->harga,
+                        'id_product'     => $item->id_product,
+                        'quantity'       => $item->quantity,
+                        'harga_beli'     => $product->harga,
                     ]);
 
-                    // Deduct stock
                     $product->decrement('stok', $item->quantity);
                 }
 
-                // Clear the database cart
-                Cart::where('id_user', $user->id_user)->delete();
+                Cart::where('id_user', $user->id_user)
+                    ->whereIn('id_product', $selectedProductIds)
+                    ->delete();
 
                 return $trx;
             });
 
-            return redirect()->to(route('dashboard') . '#user-history')->with('success', 'Pesanan "' . $transaction->kode_transaksi . '" berhasil dibuat! Silakan lakukan pembayaran.');
+            return redirect()->to(route('dashboard') . '#user-history')->with('success', 'Pesanan "' . $transaction->kode_transaksi . '" berhasil dibuat!');
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
@@ -102,8 +206,8 @@ class TransactionController extends Controller
     public function uploadPayment(Request $request, $id)
     {
         $request->validate([
-            'bukti_pembayaran' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'jumlah_bayar' => ['required', 'numeric', 'min:1'],
+            'bukti_pembayaran'  => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'jumlah_bayar'      => ['required', 'numeric', 'min:1'],
             'metode_pembayaran' => ['required', 'string', 'max:50'],
         ]);
 
@@ -121,22 +225,20 @@ class TransactionController extends Controller
         $path = $request->file('bukti_pembayaran')->store('payments', 'public');
 
         DB::transaction(function () use ($trx, $request, $path) {
-            // Create or update payment record
             Payment::updateOrCreate(
                 ['id_transaction' => $trx->id_transaction],
                 [
-                    'jumlah_bayar' => $request->jumlah_bayar,
+                    'jumlah_bayar'      => $request->jumlah_bayar,
                     'metode_pembayaran' => $request->metode_pembayaran,
-                    'bukti_pembayaran' => $path,
+                    'bukti_pembayaran'  => $path,
                     'status_pembayaran' => 'menunggu_verifikasi',
                 ]
             );
 
-            // Update transaction status
             $trx->update(['status_transaksi' => 'menunggu_verifikasi']);
         });
 
-        return redirect()->to(route('dashboard') . '#user-history')->with('success', 'Bukti pembayaran berhasil diunggah! Menunggu verifikasi dari Manager KopDes.');
+        return redirect()->to(route('dashboard') . '#user-history')->with('success', 'Bukti pembayaran berhasil diunggah!');
     }
 
     /**
@@ -147,7 +249,6 @@ class TransactionController extends Controller
         $user = Auth::user();
         $trx = Transaction::findOrFail($id);
 
-        // Check permission: only the customer who made it or the KopDes manager can cancel
         if ($user->id_role == 3 && $trx->id_user != $user->id_user) {
             abort(403, 'Unauthorized.');
         }
@@ -161,27 +262,24 @@ class TransactionController extends Controller
         }
 
         DB::transaction(function () use ($trx) {
-            // Restore inventory stock for each item in the transaction
             $details = TransactionDetail::where('id_transaction', $trx->id_transaction)->get();
             foreach ($details as $detail) {
                 Product::where('id_product', $detail->id_product)->increment('stok', $detail->quantity);
             }
 
-            // Update status
             $trx->update(['status_transaksi' => 'dibatalkan']);
 
-            // Reject payment if exists
             $payment = Payment::where('id_transaction', $trx->id_transaction)->first();
             if ($payment) {
                 $payment->update(['status_pembayaran' => 'ditolak']);
             }
         });
 
-        return back()->with('success', 'Pesanan "' . $trx->kode_transaksi . '" berhasil dibatalkan dan stok dikembalikan.');
+        return back()->with('success', 'Pesanan berhasil dibatalkan.');
     }
 
     /**
-     * Verify payment receipt (Manager permission).
+     * Verify payment receipt.
      */
     public function verifyPayment(Request $request, $id)
     {
@@ -204,31 +302,30 @@ class TransactionController extends Controller
         if ($request->action === 'approve') {
             DB::transaction(function () use ($payment, $trx, $manager) {
                 $payment->update([
-                    'status_pembayaran' => 'diverifikasi',
-                    'diverifikasi_oleh' => $manager->id_user,
+                    'status_pembayaran'  => 'diverifikasi',
+                    'diverifikasi_oleh'  => $manager->id_user,
                     'tanggal_verifikasi' => now(),
                 ]);
 
                 $trx->update(['status_transaksi' => 'diproses']);
             });
 
-            return back()->with('success', 'Pembayaran untuk transaksi "' . $trx->kode_transaksi . '" berhasil diverifikasi dan pesanan kini diproses!');
+            return back()->with('success', 'Pembayaran berhasil diverifikasi!');
         } else {
             DB::transaction(function () use ($payment, $trx) {
                 $payment->update([
                     'status_pembayaran' => 'ditolak',
                 ]);
 
-                // Reset transaction status back to pending payment so user can re-upload proof
                 $trx->update(['status_transaksi' => 'menunggu_pembayaran']);
             });
 
-            return back()->with('success', 'Pembayaran ditolak. Transaksi dikembalikan ke status Menunggu Pembayaran.');
+            return back()->with('success', 'Pembayaran ditolak.');
         }
     }
 
     /**
-     * Update client transaction status (for Managers).
+     * Update client transaction status.
      */
     public function updateStatus(Request $request, $id)
     {
@@ -259,7 +356,6 @@ class TransactionController extends Controller
                 $trx->status_transaksi = $newStatus;
                 $trx->save();
 
-                // If cancelled, restore product stock
                 if ($newStatus === 'dibatalkan' && $oldStatus !== 'dibatalkan') {
                     foreach ($trx->details as $detail) {
                         $product = Product::lockForUpdate()->find($detail->id_product);
@@ -267,9 +363,7 @@ class TransactionController extends Controller
                             $product->increment('stok', $detail->quantity);
                         }
                     }
-                }
-                // If moving away from cancelled, deduct product stock again
-                elseif ($oldStatus === 'dibatalkan' && $newStatus !== 'dibatalkan') {
+                } elseif ($oldStatus === 'dibatalkan' && $newStatus !== 'dibatalkan') {
                     foreach ($trx->details as $detail) {
                         $product = Product::lockForUpdate()->find($detail->id_product);
                         if ($product) {
@@ -282,70 +376,9 @@ class TransactionController extends Controller
                 }
             });
 
-            return back()->with('success', 'Status transaksi ' . $trx->kode_transaksi . ' berhasil diperbarui menjadi: ' . strtoupper($newStatus));
+            return back()->with('success', 'Status transaksi berhasil diperbarui.');
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
-    }
-
-    /**
-     * Store a product review tied to a specific transaction detail line (1 review per purchase).
-     */
-    public function storeReview(Request $request)
-    {
-        $request->validate([
-            'id_transaction_detail' => ['required', 'exists:transaction_detail,id_transaction_detail'],
-            'rating'                => ['required', 'integer', 'min:1', 'max:5'],
-            'komentar'              => ['nullable', 'string', 'max:1000'],
-        ]);
-
-        $user   = Auth::user();
-        $detail = TransactionDetail::with('transaction')->findOrFail($request->id_transaction_detail);
-
-        // Verify ownership: this order line must belong to a completed transaction of this user
-        if ($detail->transaction->id_user !== $user->id_user
-            || $detail->transaction->status_transaksi !== 'selesai') {
-            return back()->withErrors(['error' => 'Anda hanya dapat mengulas produk dari transaksi yang sudah selesai.']);
-        }
-
-        // One review per transaction detail (not overwrite across different orders)
-        \App\Models\Review::updateOrCreate(
-            ['id_transaction_detail' => $detail->id_transaction_detail],
-            [
-                'id_user'    => $user->id_user,
-                'id_product' => $detail->id_product,
-                'rating'     => $request->rating,
-                'komentar'   => $request->komentar,
-                'reviewed_at' => now(),
-            ]
-        );
-
-        return back()->with('success', 'Ulasan Anda berhasil disimpan!');
-    }
-
-    /**
-     * Manager reply to a review.
-     */
-    public function replyReview(Request $request, $id)
-    {
-        $request->validate([
-            'tanggapan_manager' => ['required', 'string', 'max:1000'],
-        ]);
-
-        $manager = Auth::user();
-        if ($manager->id_role != 2) {
-            abort(403, 'Unauthorized.');
-        }
-
-        $review = \App\Models\Review::findOrFail($id);
-
-        // Verify this review belongs to this manager's KopDes
-        if ($review->product->id_kopdes !== $manager->id_kopdes) {
-            abort(403, 'Unauthorized.');
-        }
-
-        $review->update(['tanggapan_manager' => $request->tanggapan_manager]);
-
-        return back()->with('success', 'Tanggapan berhasil disimpan.');
     }
 }
