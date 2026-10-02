@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palet Warna - KopDes Digital</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        /* Outer Frame / Container */
+        .palette-wrapper {
+            background: #dbeafe;
+            padding: 24px;
+            border-radius: 36px;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(255, 255, 255, 0.8);
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* Individual Color Card */
+        .color-card {
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .color-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Card Header (Name + Hex) */
+        .card-header {
+            padding: 28px 26px 24px 26px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .color-name {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .hex-code {
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        /* Shade Strips Bar */
+        .shades-bar {
+            display: flex;
+            height: 24px;
+            width: 100%;
+        }
+
+        .shade {
+            flex: 1;
+            height: 100%;
+        }
+
+        /* -------------------------------------------------------------
+           1. PRIMARY: KOPDES CRIMSON RED (#C52228)
+           ------------------------------------------------------------- */
+        .card-crimson { background-color: #C52228; color: #FFFFFF; }
+        .card-crimson .s1 { background: #000000; }
+        .card-crimson .s2 { background: #3d0508; }
+        .card-crimson .s3 { background: #61090d; }
+        .card-crimson .s4 { background: #870e13; }
+        .card-crimson .s5 { background: #a6151a; }
+        .card-crimson .s6 { background: #C52228; }
+        .card-crimson .s7 { background: #e0484d; }
+        .card-crimson .s8 { background: #f07d81; }
+        .card-crimson .s9 { background: #fbbec0; }
+        .card-crimson .s10 { background: #ffffff; }
+
+        /* -------------------------------------------------------------
+           2. NEUTRAL DARK: DEEP SLATE (#111827)
+           ------------------------------------------------------------- */
+        .card-slate { background-color: #111827; color: #FFFFFF; }
+        .card-slate .s1 { background: #000000; }
+        .card-slate .s2 { background: #0b0f19; }
+        .card-slate .s3 { background: #111827; }
+        .card-slate .s4 { background: #1f2937; }
+        .card-slate .s5 { background: #374151; }
+        .card-slate .s6 { background: #4b5563; }
+        .card-slate .s7 { background: #6b7280; }
+        .card-slate .s8 { background: #9ca3af; }
+        .card-slate .s9 { background: #d1d5db; }
+        .card-slate .s10 { background: #ffffff; }
+
+        /* -------------------------------------------------------------
+           3. BACKGROUND / SURFACE: CLEAN WHITE (#F9FAFB)
+           ------------------------------------------------------------- */
+        .card-white { background-color: #F9FAFB; color: #111827; border: 1px solid rgba(0,0,0,0.04); }
+        .card-white .s1 { background: #111827; }
+        .card-white .s2 { background: #1f2937; }
+        .card-white .s3 { background: #374151; }
+        .card-white .s4 { background: #4b5563; }
+        .card-white .s5 { background: #6b7280; }
+        .card-white .s6 { background: #9ca3af; }
+        .card-white .s7 { background: #d1d5db; }
+        .card-white .s8 { background: #e5e7eb; }
+        .card-white .s9 { background: #f3f4f6; }
+        .card-white .s10 { background: #F9FAFB; }
+
+        /* -------------------------------------------------------------
+           4. STATUS SUCCESS: EMERALD GREEN (#10B981)
+           ------------------------------------------------------------- */
+        .card-emerald { background-color: #10B981; color: #FFFFFF; }
+        .card-emerald .s1 { background: #000000; }
+        .card-emerald .s2 { background: #032a1e; }
+        .card-emerald .s3 { background: #064e3b; }
+        .card-emerald .s4 { background: #065f46; }
+        .card-emerald .s5 { background: #047857; }
+        .card-emerald .s6 { background: #10B981; }
+        .card-emerald .s7 { background: #34d399; }
+        .card-emerald .s8 { background: #6ee7b7; }
+        .card-emerald .s9 { background: #a7f3d0; }
+        .card-emerald .s10 { background: #ffffff; }
+
+        /* -------------------------------------------------------------
+           5. ACCENT / WARNING: AMBER GOLD (#F59E0B)
+           ------------------------------------------------------------- */
+        .card-amber { background-color: #F59E0B; color: #FFFFFF; }
+        .card-amber .s1 { background: #000000; }
+        .card-amber .s2 { background: #451a03; }
+        .card-amber .s3 { background: #78350f; }
+        .card-amber .s4 { background: #92400e; }
+        .card-amber .s5 { background: #b45309; }
+        .card-amber .s6 { background: #F59E0B; }
+        .card-amber .s7 { background: #fbbf24; }
+        .card-amber .s8 { background: #fcd34d; }
+        .card-amber .s9 { background: #fef08a; }
+        .card-amber .s10 { background: #ffffff; }
+    </style>
+</head>
+<body>
+
+    <div class="palette-wrapper">
+        <!-- 1. KopDes Crimson Red -->
+        <div class="color-card card-crimson">
+            <div class="card-header">
+                <span class="color-name">Crimson Red</span>
+                <span class="hex-code">#C52228</span>
+            </div>
+            <div class="shades-bar">
+                <div class="shade s1"></div>
+                <div class="shade s2"></div>
+                <div class="shade s3"></div>
+                <div class="shade s4"></div>
+                <div class="shade s5"></div>
+                <div class="shade s6"></div>
+                <div class="shade s7"></div>
+                <div class="shade s8"></div>
+                <div class="shade s9"></div>
+                <div class="shade s10"></div>
+            </div>
+        </div>
+
+        <!-- 2. Slate Dark -->
+        <div class="color-card card-slate">
+            <div class="card-header">
+                <span class="color-name">Slate Dark</span>
+                <span class="hex-code">#111827</span>
+            </div>
+            <div class="shades-bar">
+                <div class="shade s1"></div>
+                <div class="shade s2"></div>
+                <div class="shade s3"></div>
+                <div class="shade s4"></div>
+                <div class="shade s5"></div>
+                <div class="shade s6"></div>
+                <div class="shade s7"></div>
+                <div class="shade s8"></div>
+                <div class="shade s9"></div>
+                <div class="shade s10"></div>
+            </div>
+        </div>
+
+        <!-- 3. Clean White -->
+        <div class="color-card card-white">
+            <div class="card-header">
+                <span class="color-name">Clean White</span>
+                <span class="hex-code">#F9FAFB</span>
+            </div>
+            <div class="shades-bar">
+                <div class="shade s1"></div>
+                <div class="shade s2"></div>
+                <div class="shade s3"></div>
+                <div class="shade s4"></div>
+                <div class="shade s5"></div>
+                <div class="shade s6"></div>
+                <div class="shade s7"></div>
+                <div class="shade s8"></div>
+                <div class="shade s9"></div>
+                <div class="shade s10"></div>
+            </div>
+        </div>
+
+        <!-- 4. Emerald Green -->
+        <div class="color-card card-emerald">
+            <div class="card-header">
+                <span class="color-name">Emerald Green</span>
+                <span class="hex-code">#10B981</span>
+            </div>
+            <div class="shades-bar">
+                <div class="shade s1"></div>
+                <div class="shade s2"></div>
+                <div class="shade s3"></div>
+                <div class="shade s4"></div>
+                <div class="shade s5"></div>
+                <div class="shade s6"></div>
+                <div class="shade s7"></div>
+                <div class="shade s8"></div>
+                <div class="shade s9"></div>
+                <div class="shade s10"></div>
+            </div>
+        </div>
+
+        <!-- 5. Amber Gold -->
+        <div class="color-card card-amber">
+            <div class="card-header">
+                <span class="color-name">Amber Gold</span>
+                <span class="hex-code">#F59E0B</span>
+            </div>
+            <div class="shades-bar">
+                <div class="shade s1"></div>
+                <div class="shade s2"></div>
+                <div class="shade s3"></div>
+                <div class="shade s4"></div>
+                <div class="shade s5"></div>
+                <div class="shade s6"></div>
+                <div class="shade s7"></div>
+                <div class="shade s8"></div>
+                <div class="shade s9"></div>
+                <div class="shade s10"></div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

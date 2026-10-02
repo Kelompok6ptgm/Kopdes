@@ -84,28 +84,39 @@ class TransactionController extends Controller
     }
 
     /**
-     * Display transaction reports for Admin/Manager.
+     * Display transaction reports per KopDes per month.
      */
-    public function reports()
+    public function reports(Request $request)
     {
         $user = Auth::user();
 
-        if ($user->id_role == 1) {
-            $transactions = Transaction::where('status_transaksi', 'selesai')
-                ->with(['user', 'kopdes'])
-                ->latest()
-                ->get();
-        } elseif ($user->id_role == 2) {
-            $transactions = Transaction::where('id_kopdes', $user->id_kopdes)
-                ->where('status_transaksi', 'selesai')
-                ->with(['user'])
-                ->latest()
-                ->get();
-        } else {
+        if (!in_array($user->id_role, [1, 2])) {
             abort(403, 'Unauthorized.');
         }
 
-        return view('admin.laporan.index', compact('transactions'));
+        $bulan = $request->input('bulan', date('m'));
+        $tahun = $request->input('tahun', date('Y'));
+
+        $kopdesQuery = Kopdes::query();
+
+        if ($user->id_role == 2) {
+            $kopdesQuery->where('id_kopdes', $user->id_kopdes);
+        }
+
+        $laporan = $kopdesQuery->with(['transactions' => function ($q) use ($bulan, $tahun) {
+            $q->whereMonth('created_at', $bulan)
+              ->whereYear('created_at', $tahun);
+        }])->get()->map(function ($kopdes) {
+            $transaksiBerhasil = $kopdes->transactions->whereIn('status_transaksi', ['diproses', 'dikirim', 'selesai']);
+            
+            $kopdes->total_transaksi = $kopdes->transactions->count();
+            $kopdes->transaksi_berhasil = $transaksiBerhasil->count();
+            $kopdes->total_pemasukan = $transaksiBerhasil->sum('total_harga');
+            
+            return $kopdes;
+        });
+
+        return view('admin.laporan.index', compact('laporan', 'bulan', 'tahun'));
     }
 
     /**

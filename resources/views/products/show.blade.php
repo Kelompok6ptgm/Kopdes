@@ -36,7 +36,7 @@
                 <!-- Image -->
                 <div class="md:w-80 flex-shrink-0 bg-gray-100 flex items-center justify-center min-h-64">
                     @if($product->gambar)
-                        <img src="{{ asset('storage/' . $product->gambar) }}" alt="{{ $product->nama_produk }}" class="w-full h-72 md:h-full object-cover">
+                        <img src="{{ asset($product->gambar) }}" alt="{{ $product->nama_produk }}" class="w-full h-72 md:h-full object-cover">
                     @else
                         <div class="w-full h-72 md:h-full flex items-center justify-center bg-gray-100">
                             <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
