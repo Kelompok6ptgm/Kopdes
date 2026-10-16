@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preview UI - Koperasi Desa (KopDes)</title>
-    <!-- Tailwind CSS CDN for standalone preview -->
+    <title>Preview Desain Web - Koperasi Desa (KopDes)</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,453 +12,1174 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Instrument Sans', sans-serif; }
-        .tab-indicator { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased min-h-screen pb-12">
+<body class="bg-gray-50 text-gray-900 min-h-screen">
 
-    <!-- FLOATING ROLE SWITCHER BAR -->
-    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 py-3 shadow-xs">
+    <!-- FLOATING TOP PREVIEW CONTROLLER (Sticky bar) -->
+    <div class="sticky top-0 z-50 bg-slate-900/95 text-white backdrop-blur-md border-b border-slate-800 px-4 py-2.5 shadow-md">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center space-x-2">
-                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#c52228] text-white font-black text-sm">KD</span>
+            <div class="flex items-center space-x-3">
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#c52228] text-white font-extrabold text-xs">KD</span>
                 <div>
-                    <h1 class="text-sm font-bold text-slate-900 leading-tight">KopDes UI Design Preview</h1>
-                    <p class="text-[11px] text-slate-500">Standalone Prototype &bull; Tanpa database / dummy login</p>
+                    <span class="text-xs font-bold tracking-tight block">KopDes 1:1 Live UI Preview</span>
+                    <span class="text-[10px] text-slate-400 block" id="current-screen-label">Layar: Landing Page</span>
                 </div>
             </div>
 
-            <!-- Role Selector Toggle -->
-            <div class="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-semibold shadow-inner">
-                <button onclick="switchRole('user')" id="btn-role-user" class="role-btn px-4 py-1.5 rounded-lg transition-all duration-200 bg-white text-[#c52228] shadow-xs font-bold">
-                    <i class="fa-solid fa-store mr-1.5"></i>User (Warga)
+            <!-- Quick Jump Controls -->
+            <div class="flex items-center space-x-1 sm:space-x-2 text-xs">
+                <button onclick="showScreen('landing')" id="btn-screen-landing" class="screen-btn px-3 py-1.5 rounded-lg font-bold bg-[#c52228] text-white transition-all">
+                    1. Landing Page
                 </button>
-                <button onclick="switchRole('manager')" id="btn-role-manager" class="role-btn px-4 py-1.5 rounded-lg transition-all duration-200 text-slate-600 hover:text-slate-900">
-                    <i class="fa-solid fa-shop-lock mr-1.5"></i>Manager KopDes
+                <button onclick="showScreen('login')" id="btn-screen-login" class="screen-btn px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
+                    2. Halaman Login (Pilih Role)
                 </button>
-                <button onclick="switchRole('admin')" id="btn-role-admin" class="role-btn px-4 py-1.5 rounded-lg transition-all duration-200 text-slate-600 hover:text-slate-900">
-                    <i class="fa-solid fa-shield-halved mr-1.5"></i>Administrator
+                <div class="h-4 w-px bg-slate-700 mx-1"></div>
+                <button onclick="enterRole('user')" class="px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
+                    User
+                </button>
+                <button onclick="enterRole('manager')" class="px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
+                    Manager
+                </button>
+                <button onclick="enterRole('admin')" class="px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
+                    Admin
                 </button>
             </div>
         </div>
-    </header>
+    </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
 
-        <!-- ============================================================== -->
-        <!-- VIEW 1: USER / WARGA STOREFRONT & CATALOG                      -->
-        <!-- ============================================================== -->
-        <section id="view-user" class="role-view space-y-6">
-            <!-- User Storefront Mock Navbar -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-xl bg-red-50 text-[#c52228] flex items-center justify-center font-bold text-lg">
-                        <i class="fa-solid fa-wheat-awn"></i>
+    <!-- ========================================================================= -->
+    <!-- SCREEN 1: LANDING PAGE (SAMA 1:1 DENGAN TAMPILAN GUEST WEBSITE)            -->
+    <!-- ========================================================================= -->
+    <div id="screen-landing" class="screen-container">
+        <!-- Landing Navbar -->
+        <nav class="bg-white border-b border-gray-200 sticky top-12 z-30 shadow-xs">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center space-x-3 cursor-pointer" onclick="switchLandingTab('landing-catalog')">
+                        <div class="w-8 h-8 rounded-lg bg-[#c52228] flex items-center justify-center text-white font-bold text-sm">KD</div>
+                        <span class="text-[#c52228] font-bold text-base md:text-lg tracking-tight">KoperasiDesa</span>
                     </div>
-                    <div>
-                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Koperasi Aktif</span>
-                        <h2 class="font-bold text-sm text-slate-900">Koperasi Desa Sukamaju Mandiri</h2>
+
+                    <div class="hidden md:flex items-center space-x-8 h-16">
+                        <button onclick="switchLandingTab('landing-catalog')" id="ltab-btn-catalog" class="py-5 font-bold text-sm text-gray-900 border-b-2 border-[#c52228]">Katalog Koperasi</button>
+                        <button onclick="switchLandingTab('landing-products')" id="ltab-btn-products" class="py-5 font-semibold text-sm text-gray-500 hover:text-gray-900 border-b-2 border-transparent">Barang</button>
                     </div>
-                </div>
 
-                <!-- Sub-nav tabs -->
-                <div class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold bg-slate-50 p-1 rounded-xl border border-slate-200">
-                    <button class="px-3 py-1.5 bg-white text-[#c52228] rounded-lg shadow-xs font-bold">Katalog Produk</button>
-                    <button class="px-3 py-1.5 text-slate-600 hover:text-slate-900">Keranjang (2)</button>
-                    <button class="px-3 py-1.5 text-slate-600 hover:text-slate-900">Riwayat Belanja</button>
-                </div>
-
-                <div class="flex items-center space-x-3">
-                    <span class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-semibold border border-emerald-200">
-                        <i class="fa-solid fa-location-dot mr-1"></i>Bogor, Jawa Barat
-                    </span>
-                    <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-700">FW</div>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="switchLandingTab('landing-carts')" class="p-2 rounded-lg text-gray-600 hover:text-red-600 hover:bg-red-50 relative flex items-center">
+                            <i class="fa-solid fa-cart-shopping text-lg"></i>
+                            <span class="absolute top-0 right-0 bg-[#c52228] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">2</span>
+                        </button>
+                        <button onclick="showScreen('login')" class="bg-[#c52228] hover:bg-[#a51c21] text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-xs">
+                            Masuk
+                        </button>
+                        <button onclick="alert('Ini halaman preview mode. Silakan klik tombol Masuk untuk melihat simulasi tiap role.')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-xs font-bold transition-all">
+                            Daftar
+                        </button>
+                    </div>
                 </div>
             </div>
+        </nav>
 
-            <!-- Banner Hero -->
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#c52228] to-[#99151b] text-white p-6 sm:p-10 shadow-md">
-                <div class="max-w-xl space-y-2 relative z-10">
-                    <span class="text-xs uppercase tracking-wider font-extrabold bg-white/20 text-white px-2.5 py-1 rounded-full inline-block backdrop-blur-xs">
-                        Pemberdayaan Ekonomi Desa
-                    </span>
-                    <h2 class="text-2xl sm:text-4xl font-extrabold leading-tight">Belanja Hasil Bumi & Kebutuhan Pokok Desa</h2>
-                    <p class="text-xs sm:text-sm text-red-100 font-normal">Dukung petani dan pengrajin lokal dengan berbelanja langsung dari unit koperasi terdekat.</p>
-                </div>
-                <div class="absolute right-0 bottom-0 top-0 w-1/3 opacity-15 flex items-center justify-center pointer-events-none">
-                    <i class="fa-solid fa-basket-shopping text-9xl"></i>
-                </div>
-            </div>
-
-            <!-- Products Catalog Mockup -->
-            <div class="space-y-4">
-                <div class="flex items-center justify-between">
+        <!-- Landing Sub-Section 1: Catalog -->
+        <main class="max-w-7xl mx-auto px-4 py-6 md:py-8 sm:px-6 lg:px-8 space-y-8">
+            <div id="landing-catalog" class="landing-tab-content space-y-6">
+                <!-- Info Koperasi Anda -->
+                <div class="bg-white p-4 md:p-6 rounded-xl border border-gray-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h3 class="text-lg font-bold text-slate-900">Daftar Produk Unggulan</h3>
-                        <p class="text-xs text-slate-500">Harga resmi terverifikasi pengurus koperasi</p>
+                        <h2 class="font-bold text-base md:text-lg text-gray-900">Koperasi Desa (KopDes) Pilihan</h2>
+                        <p class="text-xs md:text-sm text-gray-500 mt-0.5">Menampilkan produk dari koperasi terdekat di wilayah Anda.</p>
                     </div>
-                    <div class="relative">
-                        <input type="text" placeholder="Cari nama barang..." class="bg-white border border-slate-200 rounded-xl px-3.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-500 w-44 sm:w-64">
+                    <div class="w-full md:w-80">
+                        <select class="w-full px-4 py-2 border border-gray-300 rounded-lg text-xs md:text-sm outline-none bg-white">
+                            <option>Koperasi Desa Sukamaju Mandiri (16710)</option>
+                            <option>Koperasi Tani Makmur Berkah (43253)</option>
+                            <option>Koperasi Nelayan Pesisir Jaya (45217)</option>
+                        </select>
                     </div>
                 </div>
 
-                <!-- Product Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Section Header -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="font-bold text-lg md:text-xl text-gray-900 flex items-center">
+                            <span class="w-2.5 h-6 bg-[#c52228] rounded-full mr-3"></span>
+                            Barang Tersedia: Koperasi Desa Sukamaju Mandiri
+                        </h3>
+                        <p class="text-xs text-gray-500 mt-1">Pratinjau barang terpopuler. Buka menu Barang untuk katalog lengkap.</p>
+                    </div>
+                    <button onclick="switchLandingTab('landing-products')" class="bg-[#c52228] hover:bg-[#a51c21] text-white px-4 py-2 rounded-lg text-xs font-bold shadow-xs transition-all flex items-center justify-center w-fit">
+                        Lihat Semua Barang (4) &rarr;
+                    </button>
+                </div>
+
+                <!-- 4 Items Preview Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                     <!-- Item 1 -->
-                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between">
-                        <div class="h-40 bg-slate-100 relative flex items-center justify-center overflow-hidden">
-                            <span class="absolute top-2.5 left-2.5 bg-red-50 text-[#c52228] text-[10px] font-bold px-2 py-0.5 rounded-md border border-red-100">Sembako</span>
-                            <i class="fa-solid fa-wheat-awn text-4xl text-slate-300"></i>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden flex flex-col justify-between p-4 space-y-3 hover:shadow-md transition-all">
+                        <div class="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                            <i class="fa-solid fa-wheat-awn text-4xl text-gray-300"></i>
                         </div>
-                        <div class="p-4 space-y-2 flex-1 flex flex-col justify-between">
-                            <div>
-                                <h4 class="font-bold text-sm text-slate-900 leading-snug">Beras Pandan Wangi 5kg</h4>
-                                <p class="text-[11px] text-slate-500 line-clamp-2 mt-0.5">Beras pulen alami panen petani lokal Cianjur tanpa pemutih.</p>
-                            </div>
-                            <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block font-medium">Harga</span>
-                                    <span class="font-extrabold text-sm text-[#c52228]">Rp 72.000</span>
-                                </div>
-                                <span class="text-[10px] text-slate-500 bg-slate-100 px-2 py-1 rounded-md font-semibold">Stok: 35</span>
-                            </div>
-                            <button class="w-full bg-[#c52228] hover:bg-[#a51c21] text-white text-xs font-bold py-2 rounded-xl transition-colors">
-                                + Tambah Keranjang
-                            </button>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Sembako</span>
+                            <h4 class="font-bold text-gray-900 text-sm mt-2 line-clamp-1">Beras Pandan Wangi 5kg</h4>
+                            <p class="text-xs text-gray-500 line-clamp-2 mt-1">Beras pulen alami panen petani lokal Cianjur tanpa pemutih.</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 72.000</span>
+                            <button onclick="showScreen('login')" class="bg-[#c52228] hover:bg-[#a51c21] text-white px-2.5 py-1 rounded text-xs font-semibold shadow-xs">+ Keranjang</button>
                         </div>
                     </div>
 
                     <!-- Item 2 -->
-                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between">
-                        <div class="h-40 bg-slate-100 relative flex items-center justify-center overflow-hidden">
-                            <span class="absolute top-2.5 left-2.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-100">Hasil Tani</span>
-                            <i class="fa-solid fa-seedling text-4xl text-slate-300"></i>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden flex flex-col justify-between p-4 space-y-3 hover:shadow-md transition-all">
+                        <div class="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                            <i class="fa-solid fa-seedling text-4xl text-gray-300"></i>
                         </div>
-                        <div class="p-4 space-y-2 flex-1 flex flex-col justify-between">
-                            <div>
-                                <h4 class="font-bold text-sm text-slate-900 leading-snug">Madu Murni Hutan 250ml</h4>
-                                <p class="text-[11px] text-slate-500 line-clamp-2 mt-0.5">Madu lebah liar berkualitas tinggi panen kelompok tani hutan.</p>
-                            </div>
-                            <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block font-medium">Harga</span>
-                                    <span class="font-extrabold text-sm text-[#c52228]">Rp 65.000</span>
-                                </div>
-                                <span class="text-[10px] text-slate-500 bg-slate-100 px-2 py-1 rounded-md font-semibold">Stok: 12</span>
-                            </div>
-                            <button class="w-full bg-[#c52228] hover:bg-[#a51c21] text-white text-xs font-bold py-2 rounded-xl transition-colors">
-                                + Tambah Keranjang
-                            </button>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Hasil Tani</span>
+                            <h4 class="font-bold text-gray-900 text-sm mt-2 line-clamp-1">Madu Murni Hutan 250ml</h4>
+                            <p class="text-xs text-gray-500 line-clamp-2 mt-1">Madu lebah liar berkualitas tinggi panen kelompok tani hutan.</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 65.000</span>
+                            <button onclick="showScreen('login')" class="bg-[#c52228] hover:bg-[#a51c21] text-white px-2.5 py-1 rounded text-xs font-semibold shadow-xs">+ Keranjang</button>
                         </div>
                     </div>
 
                     <!-- Item 3 -->
-                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between">
-                        <div class="h-40 bg-slate-100 relative flex items-center justify-center overflow-hidden">
-                            <span class="absolute top-2.5 left-2.5 bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-md border border-amber-100">Kebutuhan</span>
-                            <i class="fa-solid fa-bottle-droplet text-4xl text-slate-300"></i>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden flex flex-col justify-between p-4 space-y-3 hover:shadow-md transition-all">
+                        <div class="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                            <i class="fa-solid fa-bottle-droplet text-4xl text-gray-300"></i>
                         </div>
-                        <div class="p-4 space-y-2 flex-1 flex flex-col justify-between">
-                            <div>
-                                <h4 class="font-bold text-sm text-slate-900 leading-snug">Minyak Goreng Sawit 2L</h4>
-                                <p class="text-[11px] text-slate-500 line-clamp-2 mt-0.5">Minyak goreng jernih kualitas standar SNI subsidi anggota.</p>
-                            </div>
-                            <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block font-medium">Harga</span>
-                                    <span class="font-extrabold text-sm text-[#c52228]">Rp 34.000</span>
-                                </div>
-                                <span class="text-[10px] text-slate-500 bg-slate-100 px-2 py-1 rounded-md font-semibold">Stok: 50</span>
-                            </div>
-                            <button class="w-full bg-[#c52228] hover:bg-[#a51c21] text-white text-xs font-bold py-2 rounded-xl transition-colors">
-                                + Tambah Keranjang
-                            </button>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Kebutuhan</span>
+                            <h4 class="font-bold text-gray-900 text-sm mt-2 line-clamp-1">Minyak Goreng Sawit 2L</h4>
+                            <p class="text-xs text-gray-500 line-clamp-2 mt-1">Minyak goreng jernih kualitas SNI harga bersahabat.</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 34.000</span>
+                            <button onclick="showScreen('login')" class="bg-[#c52228] hover:bg-[#a51c21] text-white px-2.5 py-1 rounded text-xs font-semibold shadow-xs">+ Keranjang</button>
                         </div>
                     </div>
 
                     <!-- Item 4 -->
-                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between">
-                        <div class="h-40 bg-slate-100 relative flex items-center justify-center overflow-hidden">
-                            <span class="absolute top-2.5 left-2.5 bg-purple-50 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-md border border-purple-100">Kerajinan</span>
-                            <i class="fa-solid fa-mug-saucer text-4xl text-slate-300"></i>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden flex flex-col justify-between p-4 space-y-3 hover:shadow-md transition-all">
+                        <div class="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                            <i class="fa-solid fa-mug-saucer text-4xl text-gray-300"></i>
                         </div>
-                        <div class="p-4 space-y-2 flex-1 flex flex-col justify-between">
-                            <div>
-                                <h4 class="font-bold text-sm text-slate-900 leading-snug">Cangkir Batok Kelapa Klasik</h4>
-                                <p class="text-[11px] text-slate-500 line-clamp-2 mt-0.5">Kerajinan tangan ramah lingkungan olahan ibu-ibu PKK desa.</p>
-                            </div>
-                            <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 block font-medium">Harga</span>
-                                    <span class="font-extrabold text-sm text-[#c52228]">Rp 25.000</span>
-                                </div>
-                                <span class="text-[10px] text-slate-500 bg-slate-100 px-2 py-1 rounded-md font-semibold">Stok: 8</span>
-                            </div>
-                            <button class="w-full bg-[#c52228] hover:bg-[#a51c21] text-white text-xs font-bold py-2 rounded-xl transition-colors">
-                                + Tambah Keranjang
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================== -->
-        <!-- VIEW 2: MANAGER KOPDES PANEL                                   -->
-        <!-- ============================================================== -->
-        <section id="view-manager" class="role-view hidden space-y-6">
-            <!-- Manager Header Info -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-wrap items-center justify-between gap-4 shadow-xs">
-                <div>
-                    <span class="text-xs uppercase font-extrabold tracking-wider text-[#c52228]">Manager Workstation</span>
-                    <h2 class="text-xl font-bold text-slate-900 mt-0.5">Koperasi Desa Sukamaju Mandiri</h2>
-                    <p class="text-xs text-slate-500">Pengelola: Budi Santoso &bull; Wilayah: Kec. Sukaraja, Bogor</p>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <span class="text-xs font-bold bg-green-50 text-green-700 px-3 py-1.5 rounded-xl border border-green-200">
-                        <i class="fa-solid fa-circle-check mr-1.5"></i>Status: Aktif Beroperasi
-                    </span>
-                </div>
-            </div>
-
-            <!-- Stats KPI Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
-                    <span class="text-xs text-slate-500 font-semibold uppercase">Total Produk Aktif</span>
-                    <div class="flex items-baseline justify-between mt-2">
-                        <span class="text-3xl font-extrabold text-slate-900">48</span>
-                        <span class="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded">+4 minggu ini</span>
-                    </div>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
-                    <span class="text-xs text-slate-500 font-semibold uppercase">Pendapatan Koperasi</span>
-                    <div class="flex items-baseline justify-between mt-2">
-                        <span class="text-3xl font-extrabold text-emerald-600">Rp 18.450.000</span>
-                        <span class="text-xs text-slate-400">Total bersih</span>
-                    </div>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
-                    <span class="text-xs text-slate-500 font-semibold uppercase">Pesanan Perlu Diproses</span>
-                    <div class="flex items-baseline justify-between mt-2">
-                        <span class="text-3xl font-extrabold text-[#c52228]">6</span>
-                        <span class="text-xs text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded">Menunggu kirim</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Manager Management Tabs UI -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Inline Product Form Mockup -->
-                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs h-fit space-y-4">
-                    <div class="flex items-center justify-between border-b pb-3">
-                        <h4 class="font-bold text-sm text-slate-900 flex items-center">
-                            <i class="fa-solid fa-box-open text-[#c52228] mr-2"></i>Form Produk & Stok
-                        </h4>
-                        <span class="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded font-mono">Inline Mode</span>
-                    </div>
-                    <div class="space-y-3 text-xs">
                         <div>
-                            <label class="font-bold text-slate-700 block mb-1 uppercase text-[10px]">Nama Produk</label>
-                            <input type="text" value="Beras Pandan Wangi 5kg" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50">
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Kerajinan</span>
+                            <h4 class="font-bold text-gray-900 text-sm mt-2 line-clamp-1">Cangkir Batok Kelapa</h4>
+                            <p class="text-xs text-gray-500 line-clamp-2 mt-1">Kerajinan tangan ramah lingkungan olahan ibu-ibu PKK desa.</p>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="font-bold text-slate-700 block mb-1 uppercase text-[10px]">Harga (Rp)</label>
-                                <input type="number" value="72000" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50">
-                            </div>
-                            <div>
-                                <label class="font-bold text-slate-700 block mb-1 uppercase text-[10px]">Stok</label>
-                                <input type="number" value="35" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50">
-                            </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 25.000</span>
+                            <button onclick="showScreen('login')" class="bg-[#c52228] hover:bg-[#a51c21] text-white px-2.5 py-1 rounded text-xs font-semibold shadow-xs">+ Keranjang</button>
                         </div>
-                        <button class="w-full bg-[#c52228] hover:bg-[#a51c21] text-white font-bold py-2 rounded-xl text-xs shadow-xs">
-                            Simpan Perubahan
+                    </div>
+                </div>
+            </div>
+
+            <!-- Landing Sub-Section 2: Full Products Catalog -->
+            <div id="landing-products" class="landing-tab-content hidden space-y-8">
+                <div class="bg-white p-4 md:p-6 rounded-xl border border-gray-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-[10px] md:text-xs uppercase font-bold text-[#c52228] tracking-wider">Katalog Produk Lengkap</span>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 mt-0.5">Koperasi Desa Sukamaju Mandiri</h1>
+                        <p class="text-xs md:text-sm text-gray-500 mt-0.5">Jl. Raya Sukamaju No. 12, Sukaraja, Bogor (Kode Pos: 16710)</p>
+                    </div>
+                    <div class="w-full md:w-80">
+                        <input type="text" placeholder="Cari nama barang instan..." class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs md:text-sm outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3">
+                        <div class="w-full h-44 bg-gray-100 rounded-lg flex items-center justify-center relative group">
+                            <i class="fa-solid fa-wheat-awn text-5xl text-gray-300"></i>
+                            <div class="absolute inset-0 bg-black/40 text-white font-bold text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">Lihat Detail</div>
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Sembako</span>
+                            <h3 class="font-bold text-gray-900 text-sm mt-1">Beras Pandan Wangi 5kg</h3>
+                            <p class="text-xs text-gray-500 line-clamp-2">Beras pulen alami panen petani lokal Cianjur.</p>
+                        </div>
+                        <div class="pt-2 border-t border-gray-100 flex items-center justify-between">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 72.000</span>
+                            <button onclick="showScreen('login')" class="bg-[#c52228] text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Beli</button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3">
+                        <div class="w-full h-44 bg-gray-100 rounded-lg flex items-center justify-center relative group">
+                            <i class="fa-solid fa-seedling text-5xl text-gray-300"></i>
+                            <div class="absolute inset-0 bg-black/40 text-white font-bold text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">Lihat Detail</div>
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Hasil Tani</span>
+                            <h3 class="font-bold text-gray-900 text-sm mt-1">Madu Murni Hutan 250ml</h3>
+                            <p class="text-xs text-gray-500 line-clamp-2">Madu lebah liar berkualitas tinggi tanpa pemanis.</p>
+                        </div>
+                        <div class="pt-2 border-t border-gray-100 flex items-center justify-between">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 65.000</span>
+                            <button onclick="showScreen('login')" class="bg-[#c52228] text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Beli</button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3">
+                        <div class="w-full h-44 bg-gray-100 rounded-lg flex items-center justify-center relative group">
+                            <i class="fa-solid fa-bottle-droplet text-5xl text-gray-300"></i>
+                            <div class="absolute inset-0 bg-black/40 text-white font-bold text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">Lihat Detail</div>
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Kebutuhan</span>
+                            <h3 class="font-bold text-gray-900 text-sm mt-1">Minyak Goreng Sawit 2L</h3>
+                            <p class="text-xs text-gray-500 line-clamp-2">Minyak goreng jernih kualitas SNI harga hemat.</p>
+                        </div>
+                        <div class="pt-2 border-t border-gray-100 flex items-center justify-between">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 34.000</span>
+                            <button onclick="showScreen('login')" class="bg-[#c52228] text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Beli</button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3">
+                        <div class="w-full h-44 bg-gray-100 rounded-lg flex items-center justify-center relative group">
+                            <i class="fa-solid fa-mug-saucer text-5xl text-gray-300"></i>
+                            <div class="absolute inset-0 bg-black/40 text-white font-bold text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">Lihat Detail</div>
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Kerajinan</span>
+                            <h3 class="font-bold text-gray-900 text-sm mt-1">Cangkir Batok Kelapa</h3>
+                            <p class="text-xs text-gray-500 line-clamp-2">Kerajinan unik batok kelapa ramah lingkungan.</p>
+                        </div>
+                        <div class="pt-2 border-t border-gray-100 flex items-center justify-between">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 25.000</span>
+                            <button onclick="showScreen('login')" class="bg-[#c52228] text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Beli</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Landing Sub-Section 3: Guest Cart -->
+            <div id="landing-carts" class="landing-tab-content hidden space-y-6">
+                <h3 class="font-bold text-lg md:text-xl text-gray-900">Keranjang Belanja Tamu (Guest)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                    <div class="md:col-span-2 space-y-4">
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-xs flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-400">BP</div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-gray-900">Beras Pandan Wangi 5kg</h4>
+                                    <span class="text-xs text-gray-400">Rp 72.000 &bull; Jumlah: 1</span>
+                                </div>
+                            </div>
+                            <span class="font-bold text-sm text-gray-900">Rp 72.000</span>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-xs flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-400">MM</div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-gray-900">Madu Murni Hutan 250ml</h4>
+                                    <span class="text-xs text-gray-400">Rp 65.000 &bull; Jumlah: 1</span>
+                                </div>
+                            </div>
+                            <span class="font-bold text-sm text-gray-900">Rp 65.000</span>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-xs h-fit space-y-4">
+                        <h4 class="font-bold text-base text-gray-900">Ringkasan Belanja</h4>
+                        <div class="flex justify-between text-sm pt-2 border-t border-gray-100">
+                            <span class="text-gray-500 font-medium">Total Perkiraan</span>
+                            <span class="font-extrabold text-lg text-[#c52228]">Rp 137.000</span>
+                        </div>
+                        <button onclick="showScreen('login')" class="w-full text-center bg-[#c52228] hover:bg-[#a51c21] text-white py-2.5 rounded-xl font-bold text-sm shadow-xs transition-all">
+                            Masuk untuk Checkout
                         </button>
                     </div>
                 </div>
-
-                <!-- Product Table Mockup -->
-                <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-                    <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                        <h4 class="font-bold text-sm text-slate-900">Katalog Produk KopDes</h4>
-                        <span class="text-xs text-slate-400 font-medium">Menampilkan 4 produk contoh</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] border-b border-slate-200">
-                                <tr>
-                                    <th class="p-3">Produk</th>
-                                    <th class="p-3">Kategori</th>
-                                    <th class="p-3">Harga</th>
-                                    <th class="p-3">Stok</th>
-                                    <th class="p-3 text-right">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                <tr>
-                                    <td class="p-3 font-bold text-slate-900">Beras Pandan Wangi 5kg</td>
-                                    <td class="p-3 text-slate-600">Sembako</td>
-                                    <td class="p-3 font-semibold text-[#c52228]">Rp 72.000</td>
-                                    <td class="p-3"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-bold">35 pcs</span></td>
-                                    <td class="p-3 text-right space-x-2">
-                                        <button class="text-blue-600 hover:underline font-bold">Edit</button>
-                                        <button class="text-red-600 hover:underline font-bold">Hapus</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-bold text-slate-900">Madu Murni Hutan 250ml</td>
-                                    <td class="p-3 text-slate-600">Hasil Tani</td>
-                                    <td class="p-3 font-semibold text-[#c52228]">Rp 65.000</td>
-                                    <td class="p-3"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-bold">12 pcs</span></td>
-                                    <td class="p-3 text-right space-x-2">
-                                        <button class="text-blue-600 hover:underline font-bold">Edit</button>
-                                        <button class="text-red-600 hover:underline font-bold">Hapus</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-bold text-slate-900">Minyak Goreng Sawit 2L</td>
-                                    <td class="p-3 text-slate-600">Kebutuhan</td>
-                                    <td class="p-3 font-semibold text-[#c52228]">Rp 34.000</td>
-                                    <td class="p-3"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-bold">50 pcs</span></td>
-                                    <td class="p-3 text-right space-x-2">
-                                        <button class="text-blue-600 hover:underline font-bold">Edit</button>
-                                        <button class="text-red-600 hover:underline font-bold">Hapus</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
-        </section>
+        </main>
+    </div>
 
-        <!-- ============================================================== -->
-        <!-- VIEW 3: ADMIN PLATFORM PANEL                                   -->
-        <!-- ============================================================== -->
-        <section id="view-admin" class="role-view hidden space-y-6">
-            <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 2: HALAMAN LOGIN (DENGAN PILIHAN ROLE LANGSUNG 1:1)                 -->
+    <!-- ========================================================================= -->
+    <div id="screen-login" class="screen-container hidden min-h-[calc(100vh-48px)] flex flex-col md:flex-row bg-white">
+        <!-- Left Side: Illustration & Overlaid Text -->
+        <div class="w-full md:w-1/2 bg-white p-8 md:p-16 flex flex-col justify-between relative overflow-hidden min-h-[420px] md:min-h-screen border-b md:border-b-0 md:border-r border-gray-200">
+            <div class="flex items-center space-x-3 z-20">
+                <div class="w-8 h-8 rounded-lg bg-[#c52228] flex items-center justify-center text-white font-bold text-sm">KD</div>
+                <span class="text-[#c52228] font-bold text-lg">Koperasi Desa</span>
+            </div>
+
+            <div class="mt-8 mb-auto z-20 max-w-lg">
+                <h1 class="text-3xl md:text-5xl font-extrabold text-[#1a2d42] leading-tight mb-4">
+                    Membangun Ekonomi Desa<br>Lebih Berdaya.
+                </h1>
+                <p class="text-gray-600 text-sm md:text-base leading-relaxed">
+                    Platform digital terpadu untuk kesejahteraan anggota koperasi di seluruh penjuru Indonesia. Mari melangkah bersama menuju kemandirian ekonomi.
+                </p>
+            </div>
+
+            <div class="p-4 bg-red-50 rounded-2xl border border-red-100 z-20 space-y-1">
+                <span class="text-xs font-bold text-[#c52228] uppercase tracking-wider block">Mode Demo Interaktif</span>
+                <p class="text-xs text-gray-600">Pilih salah satu tombol role di sebelah kanan untuk langsung masuk dan melihat antarmuka asli masing-masing peran.</p>
+            </div>
+        </div>
+
+        <!-- Right Side: Form & Role Selection -->
+        <div class="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center bg-white z-20">
+            <div class="max-w-md w-full mx-auto space-y-6">
                 <div>
-                    <span class="text-xs uppercase font-extrabold tracking-wider text-[#c52228]">Super Administrator</span>
-                    <h2 class="text-xl font-bold text-slate-900 mt-0.5">Pusat Kendali Jaringan Koperasi Desa</h2>
-                    <p class="text-xs text-slate-500">Monitoring seluruh unit KopDes, manager, dan transaksi se-Indonesia</p>
+                    <h2 class="text-3xl md:text-4xl font-bold text-[#1a2d42] mb-1.5 tracking-tight">Selamat Datang!</h2>
+                    <p class="text-gray-500 text-sm">Pilih peran akun Anda untuk menguji pratinjau tampilan sistem:</p>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <span class="text-xs bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl font-bold">
-                        <i class="fa-solid fa-server mr-1.5 text-slate-400"></i>Server: Online
-                    </span>
-                </div>
-            </div>
 
-            <!-- Global KPI Stats -->
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
-                    <span class="text-xs text-slate-400 font-bold uppercase">Total KopDes Terdaftar</span>
-                    <h3 class="text-3xl font-extrabold text-slate-900 mt-2">14</h3>
-                    <p class="text-[11px] text-slate-500 mt-1">12 aktif &bull; 2 peninjauan</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
-                    <span class="text-xs text-slate-400 font-bold uppercase">Total Manager</span>
-                    <h3 class="text-3xl font-extrabold text-slate-900 mt-2">16</h3>
-                    <p class="text-[11px] text-slate-500 mt-1">Terverifikasi SK Desa</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
-                    <span class="text-xs text-slate-400 font-bold uppercase">Total Transaksi</span>
-                    <h3 class="text-3xl font-extrabold text-slate-900 mt-2">1.284</h3>
-                    <p class="text-[11px] text-emerald-600 font-bold mt-1">+18% bulan ini</p>
-                </div>
-                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
-                    <span class="text-xs text-slate-400 font-bold uppercase">Volume Perputaran Dana</span>
-                    <h3 class="text-2xl font-extrabold text-emerald-600 mt-2">Rp 142.8M</h3>
-                    <p class="text-[11px] text-slate-500 mt-1">Akumulasi nasional</p>
-                </div>
-            </div>
+                <!-- ROLE SELECTION CARDS (PILIH ROLE) -->
+                <div class="space-y-3">
+                    <!-- User Role Option -->
+                    <button onclick="enterRole('user')" class="w-full text-left p-4 rounded-2xl border-2 border-red-100 hover:border-[#c52228] bg-red-50/40 hover:bg-red-50/80 transition-all flex items-center justify-between group">
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-10 h-10 rounded-xl bg-[#c52228] text-white flex items-center justify-center font-bold text-base">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900 group-hover:text-[#c52228]">1. Masuk sebagai Warga / Anggota</h4>
+                                <p class="text-xs text-gray-500">Katalog belanja, keranjang checkbox, riwayat order, profil</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-gray-400 group-hover:text-[#c52228] group-hover:translate-x-1 transition-all text-sm"></i>
+                    </button>
 
-            <!-- KopDes List Table Mockup -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-                    <div>
-                        <h4 class="font-bold text-sm text-slate-900">Daftar Unit Koperasi Desa</h4>
-                        <p class="text-xs text-slate-500">Data unit terhubung dalam jaringan e-commerce KopDes</p>
-                    </div>
-                    <button class="bg-[#c52228] hover:bg-[#a51c21] text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs">
-                        + Tambah KopDes
+                    <!-- Manager Role Option -->
+                    <button onclick="enterRole('manager')" class="w-full text-left p-4 rounded-2xl border-2 border-gray-200 hover:border-[#c52228] hover:bg-gray-50 transition-all flex items-center justify-between group">
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-10 h-10 rounded-xl bg-slate-800 text-white flex items-center justify-center font-bold text-base">
+                                <i class="fa-solid fa-shop"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900 group-hover:text-[#c52228]">2. Masuk sebagai Manager KopDes</h4>
+                                <p class="text-xs text-gray-500">Kelola produk & stok, kategori, pesanan warga, verifikasi bayar</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-gray-400 group-hover:text-[#c52228] group-hover:translate-x-1 transition-all text-sm"></i>
+                    </button>
+
+                    <!-- Admin Role Option -->
+                    <button onclick="enterRole('admin')" class="w-full text-left p-4 rounded-2xl border-2 border-gray-200 hover:border-[#c52228] hover:bg-gray-50 transition-all flex items-center justify-between group">
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-10 h-10 rounded-xl bg-red-700 text-white flex items-center justify-center font-bold text-base">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900 group-hover:text-[#c52228]">3. Masuk sebagai Administrator</h4>
+                                <p class="text-xs text-gray-500">Pusat kendali seluruh KopDes, kelola manager, data transaksi global</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-gray-400 group-hover:text-[#c52228] group-hover:translate-x-1 transition-all text-sm"></i>
                     </button>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] border-b border-slate-200">
+
+                <div class="pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                    <button onclick="showScreen('landing')" class="hover:text-gray-900 font-semibold flex items-center">
+                        &larr; Kembali ke Landing Page
+                    </button>
+                    <span>KopDes Prototype v1.0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 3: DASHBOARD ROLE USER (ANGGOTA / PEMBELI) - PERSIS 1:1             -->
+    <!-- ========================================================================= -->
+    <div id="screen-dashboard-user" class="screen-container hidden">
+        <!-- Top Navbar User -->
+        <nav class="bg-white border-b border-gray-200 sticky top-12 z-30 shadow-xs">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center space-x-3 cursor-pointer" onclick="switchUserTab('utab-catalog')">
+                        <div class="w-8 h-8 rounded-lg bg-[#c52228] flex items-center justify-center text-white font-bold text-sm">KD</div>
+                        <span class="text-[#c52228] font-bold text-base md:text-lg tracking-tight">KoperasiDesa</span>
+                    </div>
+
+                    <div class="hidden md:flex items-center space-x-8 h-16">
+                        <button onclick="switchUserTab('utab-catalog')" id="ubtn-catalog" class="py-5 font-bold text-sm text-gray-900 border-b-2 border-[#c52228]">Katalog Koperasi</button>
+                        <button onclick="switchUserTab('utab-products')" id="ubtn-products" class="py-5 font-semibold text-sm text-gray-500 hover:text-gray-900 border-b-2 border-transparent">Barang</button>
+                        <button onclick="switchUserTab('utab-history')" id="ubtn-history" class="py-5 font-semibold text-sm text-gray-500 hover:text-gray-900 border-b-2 border-transparent">Riwayat Belanja</button>
+                        <button onclick="switchUserTab('utab-profile')" id="ubtn-profile" class="py-5 font-semibold text-sm text-gray-500 hover:text-gray-900 border-b-2 border-transparent">Profil Saya</button>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <button onclick="switchUserTab('utab-carts')" title="Keranjang Belanja" class="p-2 rounded-lg text-gray-600 hover:text-red-600 hover:bg-red-50 relative flex items-center">
+                            <i class="fa-solid fa-cart-shopping text-lg"></i>
+                            <span class="absolute top-0 right-0 bg-[#c52228] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">2</span>
+                        </button>
+                        <div onclick="switchUserTab('utab-profile')" class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-[#c52228] font-extrabold text-xs cursor-pointer" title="Fathur Wahid">
+                            FW
+                        </div>
+                        <button onclick="showScreen('landing')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold">
+                            Keluar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main User Container -->
+        <main class="max-w-7xl mx-auto px-4 py-6 md:py-8 sm:px-6 lg:px-8 space-y-8">
+            <!-- TAB 1: User Catalog -->
+            <div id="utab-catalog" class="user-tab-content space-y-6">
+                <div class="bg-white p-4 md:p-6 rounded-xl border border-gray-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="font-bold text-base md:text-lg text-gray-900">Koperasi Desa (KopDes) Anda</h2>
+                        <p class="text-xs md:text-sm text-gray-500 mt-0.5">Rekomendasi berdasarkan Kode Pos <strong>(16710)</strong> Anda.</p>
+                    </div>
+                    <div class="w-full md:w-80">
+                        <select class="w-full px-4 py-2 border border-gray-300 rounded-lg text-xs md:text-sm outline-none bg-white">
+                            <option>Koperasi Desa Sukamaju Mandiri (16710)</option>
+                            <option>Koperasi Tani Makmur Berkah (43253)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="font-bold text-lg md:text-xl text-gray-900 flex items-center">
+                            <span class="w-2.5 h-6 bg-[#c52228] rounded-full mr-3"></span>
+                            Barang Tersedia: Koperasi Desa Sukamaju Mandiri
+                        </h3>
+                        <p class="text-xs text-gray-500 mt-1">Pratinjau barang terpopuler. Buka menu Barang untuk katalog lengkap.</p>
+                    </div>
+                    <button onclick="switchUserTab('utab-products')" class="bg-[#c52228] hover:bg-[#a51c21] text-white px-4 py-2 rounded-lg text-xs font-bold shadow-xs">
+                        Lihat Semua Barang (4) &rarr;
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3">
+                        <div class="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-400">BERAS</div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Sembako</span>
+                            <h4 class="font-bold text-gray-900 text-sm mt-2">Beras Pandan Wangi 5kg</h4>
+                            <p class="text-xs text-gray-500 line-clamp-2">Beras pulen alami panen petani lokal.</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 72.000</span>
+                            <button onclick="alert('Barang dimasukkan ke keranjang belanja!')" class="bg-[#c52228] text-white px-2.5 py-1 rounded text-xs font-semibold">+ Keranjang</button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3">
+                        <div class="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-400">MADU</div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Hasil Tani</span>
+                            <h4 class="font-bold text-gray-900 text-sm mt-2">Madu Murni Hutan 250ml</h4>
+                            <p class="text-xs text-gray-500 line-clamp-2">Madu lebah liar hutan asli.</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 65.000</span>
+                            <button onclick="alert('Barang dimasukkan ke keranjang belanja!')" class="bg-[#c52228] text-white px-2.5 py-1 rounded text-xs font-semibold">+ Keranjang</button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3">
+                        <div class="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-400">MINYAK</div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Kebutuhan</span>
+                            <h4 class="font-bold text-gray-900 text-sm mt-2">Minyak Goreng Sawit 2L</h4>
+                            <p class="text-xs text-gray-500 line-clamp-2">Minyak goreng jernih kualitas SNI.</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 34.000</span>
+                            <button onclick="alert('Barang dimasukkan ke keranjang belanja!')" class="bg-[#c52228] text-white px-2.5 py-1 rounded text-xs font-semibold">+ Keranjang</button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3">
+                        <div class="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-400">BATOK</div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Kerajinan</span>
+                            <h4 class="font-bold text-gray-900 text-sm mt-2">Cangkir Batok Kelapa</h4>
+                            <p class="text-xs text-gray-500 line-clamp-2">Kerajinan tangan batok kelapa ramah lingkungan.</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 25.000</span>
+                            <button onclick="alert('Barang dimasukkan ke keranjang belanja!')" class="bg-[#c52228] text-white px-2.5 py-1 rounded text-xs font-semibold">+ Keranjang</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: User Full Products -->
+            <div id="utab-products" class="user-tab-content hidden space-y-6">
+                <div class="bg-white p-4 md:p-6 rounded-xl border border-gray-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-[10px] md:text-xs uppercase font-bold text-[#c52228] tracking-wider">Katalog Produk Lengkap</span>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900 mt-0.5">Koperasi Desa Sukamaju Mandiri</h1>
+                    </div>
+                    <input type="text" placeholder="Cari nama barang..." class="w-full md:w-80 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-xs md:text-sm">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3">
+                        <div class="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-400">BERAS</div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Sembako</span>
+                            <h3 class="font-bold text-gray-900 text-sm mt-1">Beras Pandan Wangi 5kg</h3>
+                            <p class="text-xs text-gray-500 line-clamp-2">Stok: 35 pcs</p>
+                        </div>
+                        <div class="pt-2 border-t border-gray-100 flex items-center justify-between">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 72.000</span>
+                            <button class="bg-[#c52228] text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Beli</button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-4 space-y-3">
+                        <div class="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-400">MADU</div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Hasil Tani</span>
+                            <h3 class="font-bold text-gray-900 text-sm mt-1">Madu Murni Hutan 250ml</h3>
+                            <p class="text-xs text-gray-500 line-clamp-2">Stok: 12 pcs</p>
+                        </div>
+                        <div class="pt-2 border-t border-gray-100 flex items-center justify-between">
+                            <span class="font-bold text-[#c52228] text-sm">Rp 65.000</span>
+                            <button class="bg-[#c52228] text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Beli</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: User Selective Checkout Cart -->
+            <div id="utab-carts" class="user-tab-content hidden space-y-6">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-lg md:text-xl text-gray-900">Keranjang Belanja Anda</h3>
+                    <label class="flex items-center gap-2 text-xs font-semibold text-gray-600 cursor-pointer">
+                        <input type="checkbox" id="demo-check-all" onchange="toggleDemoSelectAll(this)" checked class="rounded border-gray-300 text-[#c52228] w-4 h-4">
+                        Pilih Semua
+                    </label>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                    <div class="md:col-span-2 space-y-4">
+                        <!-- Cart item 1 -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-xs flex items-center justify-between gap-4">
+                            <input type="checkbox" checked class="demo-item-cb w-5 h-5 rounded border-gray-300 text-[#c52228] cursor-pointer" onchange="updateDemoCartTotal()">
+                            <div class="flex items-center space-x-4 flex-1">
+                                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-400">BP</div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-gray-900">Beras Pandan Wangi 5kg</h4>
+                                    <span class="text-xs text-gray-400 block">Rp 72.000</span>
+                                </div>
+                            </div>
+                            <span class="font-bold text-sm text-gray-900">Rp 72.000</span>
+                        </div>
+                        <!-- Cart item 2 -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-xs flex items-center justify-between gap-4">
+                            <input type="checkbox" checked class="demo-item-cb w-5 h-5 rounded border-gray-300 text-[#c52228] cursor-pointer" onchange="updateDemoCartTotal()">
+                            <div class="flex items-center space-x-4 flex-1">
+                                <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-400">MM</div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-gray-900">Madu Murni Hutan 250ml</h4>
+                                    <span class="text-xs text-gray-400 block">Rp 65.000</span>
+                                </div>
+                            </div>
+                            <span class="font-bold text-sm text-gray-900">Rp 65.000</span>
+                        </div>
+                    </div>
+                    <!-- Cart Summary -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-xs h-fit space-y-6">
+                        <h4 class="font-bold text-base md:text-lg text-gray-900">Ringkasan Belanja</h4>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>Dipilih</span>
+                                <span id="demo-selected-count">2 barang</span>
+                            </div>
+                            <div class="flex justify-between text-sm pt-2 border-t border-gray-100">
+                                <span class="text-gray-500 font-medium">Total Dipilih</span>
+                                <span id="demo-selected-price" class="font-extrabold text-lg text-[#c52228]">Rp 137.000</span>
+                            </div>
+                        </div>
+                        <button onclick="alert('Modal konfirmasi pesanan dibuka! (Alamat kirim & rincian pesanan)')" class="w-full bg-[#c52228] hover:bg-[#a51c21] text-white py-2.5 rounded-xl font-bold text-sm shadow-xs transition-all">
+                            Checkout Barang Dipilih
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: User History -->
+            <div id="utab-history" class="user-tab-content hidden space-y-6">
+                <h3 class="font-bold text-lg md:text-xl text-gray-900">Riwayat Belanja</h3>
+                <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-bold border-b border-gray-200">
                             <tr>
-                                <th class="p-3.5">Nama KopDes</th>
-                                <th class="p-3.5">Kota / Kab</th>
-                                <th class="p-3.5">Kecamatan</th>
-                                <th class="p-3.5">Kode Pos</th>
-                                <th class="p-3.5">Status</th>
-                                <th class="p-3.5 text-right">Aksi</th>
+                                <th class="p-4">Kode Transaksi</th>
+                                <th class="p-4">Koperasi</th>
+                                <th class="p-4">Total</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
+                        <tbody class="divide-y divide-gray-150">
                             <tr>
-                                <td class="p-3.5 font-bold text-slate-900">Koperasi Desa Sukamaju Mandiri</td>
-                                <td class="p-3.5 text-slate-600">Kabupaten Bogor</td>
-                                <td class="p-3.5 text-slate-600">Sukaraja</td>
-                                <td class="p-3.5 font-mono text-slate-500">16710</td>
-                                <td class="p-3.5"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-bold">Aktif</span></td>
-                                <td class="p-3.5 text-right space-x-2">
-                                    <button class="text-blue-600 hover:underline font-bold">Edit</button>
-                                    <button class="text-slate-600 hover:underline font-bold">Detail</button>
+                                <td class="p-4 font-semibold text-gray-900">TRX-1790-2814</td>
+                                <td class="p-4 text-gray-600">Koperasi Desa Sukamaju Mandiri</td>
+                                <td class="p-4 font-bold text-gray-900">Rp 137.000</td>
+                                <td class="p-4">
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 uppercase">Belum Bayar</span>
+                                </td>
+                                <td class="p-4 text-right space-x-2">
+                                    <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold">Bayar</button>
+                                    <button class="bg-red-50 text-red-700 px-3 py-1.5 rounded-lg text-xs font-bold">Batal</button>
                                 </td>
                             </tr>
                             <tr>
-                                <td class="p-3.5 font-bold text-slate-900">Koperasi Tani Makmur Berkah</td>
-                                <td class="p-3.5 text-slate-600">Kabupaten Cianjur</td>
-                                <td class="p-3.5 text-slate-600">Pacet</td>
-                                <td class="p-3.5 font-mono text-slate-500">43253</td>
-                                <td class="p-3.5"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-bold">Aktif</span></td>
-                                <td class="p-3.5 text-right space-x-2">
-                                    <button class="text-blue-600 hover:underline font-bold">Edit</button>
-                                    <button class="text-slate-600 hover:underline font-bold">Detail</button>
+                                <td class="p-4 font-semibold text-gray-900">TRX-1789-9941</td>
+                                <td class="p-4 text-gray-600">Koperasi Desa Sukamaju Mandiri</td>
+                                <td class="p-4 font-bold text-gray-900">Rp 72.000</td>
+                                <td class="p-4">
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200 uppercase">Selesai</span>
                                 </td>
-                            </tr>
-                            <tr>
-                                <td class="p-3.5 font-bold text-slate-900">Koperasi Nelayan Pesisir Jaya</td>
-                                <td class="p-3.5 text-slate-600">Kabupaten Indramayu</td>
-                                <td class="p-3.5 text-slate-600">Balongan</td>
-                                <td class="p-3.5 font-mono text-slate-500">45217</td>
-                                <td class="p-3.5"><span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold">Verifikasi</span></td>
-                                <td class="p-3.5 text-right space-x-2">
-                                    <button class="text-blue-600 hover:underline font-bold">Edit</button>
-                                    <button class="text-slate-600 hover:underline font-bold">Detail</button>
+                                <td class="p-4 text-right">
+                                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold">Beri Ulasan</button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-        </section>
 
-    </main>
+            <!-- TAB 5: User Profile -->
+            <div id="utab-profile" class="user-tab-content hidden max-w-3xl mx-auto space-y-6">
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+                    <div class="h-28 bg-gradient-to-r from-[#c52228] to-red-800 relative">
+                        <span class="absolute top-4 right-4 bg-white/20 text-white text-xs px-3 py-1 rounded-full font-semibold">Anggota Warga</span>
+                    </div>
+                    <div class="p-6 pt-0 space-y-6">
+                        <div class="flex items-end space-x-4 -mt-12 mb-4">
+                            <div class="w-20 h-20 rounded-full border-4 border-white bg-red-100 flex items-center justify-center text-[#c52228] font-bold text-2xl shadow-md">
+                                FW
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-900">Fathur Wahid</h3>
+                                <p class="text-xs text-gray-500">fathur@kopdes.com &bull; 081234567890</p>
+                            </div>
+                        </div>
 
-    <!-- Interactive Role Toggle Script -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div>
+                                <label class="font-bold text-gray-700 block mb-1">Nama Lengkap</label>
+                                <input type="text" value="Fathur Wahid" class="w-full border border-gray-300 rounded-lg p-2.5 bg-gray-50">
+                            </div>
+                            <div>
+                                <label class="font-bold text-gray-700 block mb-1">Nomor Handphone</label>
+                                <input type="text" value="081234567890" class="w-full border border-gray-300 rounded-lg p-2.5 bg-gray-50">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="font-bold text-gray-700 block mb-1">Alamat Pengiriman</label>
+                                <textarea rows="2" class="w-full border border-gray-300 rounded-lg p-2.5 bg-gray-50">Jl. Pahlawan Desa No. 15 RT 02/RW 04, Sukamaju, Sukaraja, Bogor</textarea>
+                            </div>
+                        </div>
+                        <button class="bg-[#c52228] text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-xs">
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 4: DASHBOARD ROLE MANAGER (PANEL KOPERASI LOKAL) - PERSIS 1:1       -->
+    <!-- ========================================================================= -->
+    <div id="screen-dashboard-manager" class="screen-container hidden">
+        <div class="flex min-h-[calc(100vh-48px)]">
+            <!-- Sidebar Manager -->
+            <aside class="w-64 bg-white text-gray-800 border-r border-gray-200 flex flex-col fixed inset-y-12 left-0 z-40">
+                <div class="p-6 flex items-center justify-between border-b border-gray-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-lg bg-[#c52228] flex items-center justify-center text-white font-bold text-sm">KD</div>
+                        <span class="font-bold text-base text-gray-900 truncate">KopDes Sukamaju</span>
+                    </div>
+                </div>
+                <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto">
+                    <button onclick="switchManagerTab('mtab-overview', this)" class="mtab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all bg-red-50 text-[#c52228] flex items-center">
+                        <i class="fa-solid fa-chart-pie w-4 mr-3"></i> Ringkasan
+                    </button>
+                    <button onclick="switchManagerTab('mtab-products', this)" class="mtab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 flex items-center">
+                        <i class="fa-solid fa-box-open w-4 mr-3"></i> Produk & Stok
+                    </button>
+                    <button onclick="switchManagerTab('mtab-categories', this)" class="mtab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 flex items-center">
+                        <i class="fa-solid fa-tags w-4 mr-3"></i> Kategori Produk
+                    </button>
+                    <button onclick="switchManagerTab('mtab-orders', this)" class="mtab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 flex items-center">
+                        <i class="fa-solid fa-bag-shopping w-4 mr-3"></i> Pesanan Pelanggan
+                    </button>
+                    <button onclick="switchManagerTab('mtab-payments', this)" class="mtab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 flex items-center">
+                        <i class="fa-solid fa-money-check-dollar w-4 mr-3"></i> Verifikasi Bayar
+                    </button>
+                    <button onclick="switchManagerTab('mtab-members', this)" class="mtab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 flex items-center">
+                        <i class="fa-solid fa-users w-4 mr-3"></i> Daftar Anggota
+                    </button>
+                </nav>
+                <div class="p-4 border-t border-gray-100">
+                    <button onclick="showScreen('landing')" class="w-full bg-[#c52228] hover:bg-[#a51c21] text-white py-2 px-4 rounded-lg text-sm font-semibold">
+                        Keluar
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Manager Content -->
+            <main class="flex-1 ml-64 p-6 md:p-8 overflow-x-hidden">
+                <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-gray-200 mb-8 gap-4">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900">Koperasi Desa Sukamaju Mandiri</h1>
+                        <p class="text-xs md:text-sm text-gray-500">Alamat: Jl. Raya Sukamaju No. 12 (Kode Pos: 16710)</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full">Manager: Budi Santoso</span>
+                    </div>
+                </header>
+
+                <!-- MANAGER TAB 1: OVERVIEW -->
+                <div id="mtab-overview" class="manager-tab-content space-y-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
+                            <span class="text-xs md:text-sm font-medium text-gray-400">Total Produk Aktif</span>
+                            <h3 class="text-2xl md:text-3xl font-bold text-gray-900 mt-2">4</h3>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
+                            <span class="text-xs md:text-sm font-medium text-gray-400">Pendapatan Koperasi</span>
+                            <h3 class="text-2xl md:text-3xl font-bold text-green-600 mt-2">Rp 18.450.000</h3>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
+                            <span class="text-xs md:text-sm font-medium text-gray-400">Pesanan Diproses</span>
+                            <h3 class="text-2xl md:text-3xl font-bold text-red-600 mt-2">2</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MANAGER TAB 2: PRODUCTS & STOK -->
+                <div id="mtab-products" class="manager-tab-content hidden space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Left: Form Tambah/Edit Produk -->
+                        <div class="bg-white rounded-xl shadow-xs p-6 border border-gray-200 h-fit space-y-4">
+                            <h3 class="font-bold text-base text-gray-900 pb-2 border-b flex items-center justify-between">
+                                <span><i class="fa-solid fa-box-open text-red-600 mr-2"></i> Form Produk</span>
+                            </h3>
+                            <div class="space-y-3 text-xs">
+                                <div>
+                                    <label class="block text-gray-700 font-bold mb-1 uppercase text-[10px]">Nama Produk</label>
+                                    <input type="text" value="Beras Pandan Wangi 5kg" class="w-full border rounded-lg px-3 py-2 bg-gray-50">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-bold mb-1 uppercase text-[10px]">Kategori</label>
+                                    <select class="w-full border rounded-lg px-3 py-2 bg-white">
+                                        <option>Sembako</option>
+                                        <option>Hasil Tani</option>
+                                        <option>Kebutuhan</option>
+                                        <option>Kerajinan</option>
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-gray-700 font-bold mb-1 uppercase text-[10px]">Harga (Rp)</label>
+                                        <input type="number" value="72000" class="w-full border rounded-lg px-3 py-2 bg-gray-50">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 font-bold mb-1 uppercase text-[10px]">Stok</label>
+                                        <input type="number" value="35" class="w-full border rounded-lg px-3 py-2 bg-gray-50">
+                                    </div>
+                                </div>
+                                <button class="w-full bg-[#c52228] text-white font-bold py-2 rounded-lg text-xs shadow">
+                                    Simpan Produk
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right: Tabel Produk -->
+                        <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-xs overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase">
+                                    <tr>
+                                        <th class="p-4">Produk</th>
+                                        <th class="p-4">Kategori</th>
+                                        <th class="p-4">Harga</th>
+                                        <th class="p-4">Stok</th>
+                                        <th class="p-4 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-150">
+                                    <tr>
+                                        <td class="p-4 font-semibold text-gray-900">Beras Pandan Wangi 5kg</td>
+                                        <td class="p-4 text-gray-600">Sembako</td>
+                                        <td class="p-4 font-semibold">Rp 72.000</td>
+                                        <td class="p-4 font-bold text-blue-600">35 pcs</td>
+                                        <td class="p-4 text-right space-x-2">
+                                            <button class="text-blue-600 hover:underline text-xs font-semibold">Edit</button>
+                                            <button class="text-red-600 hover:underline text-xs font-semibold">Hapus</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-4 font-semibold text-gray-900">Madu Murni Hutan 250ml</td>
+                                        <td class="p-4 text-gray-600">Hasil Tani</td>
+                                        <td class="p-4 font-semibold">Rp 65.000</td>
+                                        <td class="p-4 font-bold text-blue-600">12 pcs</td>
+                                        <td class="p-4 text-right space-x-2">
+                                            <button class="text-blue-600 hover:underline text-xs font-semibold">Edit</button>
+                                            <button class="text-red-600 hover:underline text-xs font-semibold">Hapus</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MANAGER TAB 3: ORDERS -->
+                <div id="mtab-orders" class="manager-tab-content hidden space-y-6">
+                    <h3 class="font-bold text-lg md:text-xl text-gray-900">Pesanan Pelanggan</h3>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase">
+                                <tr>
+                                    <th class="p-4">Kode Transaksi</th>
+                                    <th class="p-4">Pelanggan</th>
+                                    <th class="p-4">Total</th>
+                                    <th class="p-4">Status</th>
+                                    <th class="p-4 text-right">Aksi Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-150">
+                                <tr>
+                                    <td class="p-4 font-semibold text-gray-900">TRX-1790-2814</td>
+                                    <td class="p-4 text-gray-600">Fathur Wahid</td>
+                                    <td class="p-4 font-bold">Rp 137.000</td>
+                                    <td class="p-4"><span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">Menunggu Verifikasi</span></td>
+                                    <td class="p-4 text-right">
+                                        <select class="text-xs border rounded-lg px-2 py-1 bg-white">
+                                            <option>Ubah Status...</option>
+                                            <option>Diproses</option>
+                                            <option>Dikirim</option>
+                                            <option>Selesai</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Placeholder for other manager tabs -->
+                <div id="mtab-categories" class="manager-tab-content hidden p-8 bg-white rounded-xl border text-center text-sm text-gray-500">
+                    Kategori aktif: Sembako, Hasil Tani, Kebutuhan, Kerajinan
+                </div>
+                <div id="mtab-payments" class="manager-tab-content hidden p-8 bg-white rounded-xl border text-center text-sm text-gray-500">
+                    Semua pembayaran terverifikasi otomatis melalui integrasi bukti transfer.
+                </div>
+                <div id="mtab-members" class="manager-tab-content hidden p-8 bg-white rounded-xl border text-center text-sm text-gray-500">
+                    Menampilkan 24 warga yang terafiliasi dengan KopDes Sukamaju Mandiri.
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN 5: DASHBOARD ROLE ADMIN PLATFORM - PERSIS 1:1                       -->
+    <!-- ========================================================================= -->
+    <div id="screen-dashboard-admin" class="screen-container hidden">
+        <div class="flex min-h-[calc(100vh-48px)]">
+            <!-- Sidebar Admin -->
+            <aside class="w-64 bg-white text-gray-800 border-r border-gray-200 flex flex-col fixed inset-y-12 left-0 z-40">
+                <div class="p-6 flex items-center justify-between border-b border-gray-100">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-lg bg-[#c52228] flex items-center justify-center text-white font-bold text-sm">KD</div>
+                        <span class="font-bold text-lg text-[#c52228]">Admin Platform</span>
+                    </div>
+                </div>
+                <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto">
+                    <button onclick="switchAdminTab('atab-overview', this)" class="atab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all bg-red-50 text-[#c52228] flex items-center">
+                        <i class="fa-solid fa-chart-line w-4 mr-3"></i> Ringkasan
+                    </button>
+                    <button onclick="switchAdminTab('atab-kopdes', this)" class="atab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 flex items-center">
+                        <i class="fa-solid fa-building-columns w-4 mr-3"></i> Kelola KopDes
+                    </button>
+                    <button onclick="switchAdminTab('atab-managers', this)" class="atab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 flex items-center">
+                        <i class="fa-solid fa-user-tie w-4 mr-3"></i> Kelola Manager
+                    </button>
+                    <button onclick="switchAdminTab('atab-transactions', this)" class="atab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 flex items-center">
+                        <i class="fa-solid fa-receipt w-4 mr-3"></i> Semua Transaksi
+                    </button>
+                </nav>
+                <div class="p-4 border-t border-gray-100">
+                    <button onclick="showScreen('landing')" class="w-full bg-[#c52228] hover:bg-[#a51c21] text-white py-2 px-4 rounded-lg text-sm font-semibold">
+                        Keluar
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Admin Content -->
+            <main class="flex-1 ml-64 p-6 md:p-8 overflow-x-hidden">
+                <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-gray-200 mb-8 gap-4">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900">Platform Administrator</h1>
+                        <p class="text-xs md:text-sm text-gray-500">Mengelola Koperasi Desa dan Pengawas Toko</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-1 rounded-full uppercase">Admin: Super Admin</span>
+                    </div>
+                </header>
+
+                <!-- ADMIN TAB 1: OVERVIEW -->
+                <div id="atab-overview" class="admin-tab-content space-y-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
+                            <span class="text-xs md:text-sm font-medium text-gray-400">Total KopDes</span>
+                            <h3 class="text-2xl md:text-3xl font-bold text-gray-900 mt-2">14</h3>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
+                            <span class="text-xs md:text-sm font-medium text-gray-400">Total Manager</span>
+                            <h3 class="text-2xl md:text-3xl font-bold text-gray-900 mt-2">16</h3>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
+                            <span class="text-xs md:text-sm font-medium text-gray-400">Total Transaksi</span>
+                            <h3 class="text-2xl md:text-3xl font-bold text-gray-900 mt-2">1.284</h3>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
+                            <span class="text-xs md:text-sm font-medium text-gray-400">Total Omset Platform</span>
+                            <h3 class="text-2xl md:text-3xl font-bold text-red-600 mt-2">Rp 142.800.000</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs p-6">
+                        <h3 class="font-bold text-base md:text-lg text-gray-900 mb-2">Laporan Keseluruhan Platform</h3>
+                        <p class="text-xs md:text-sm text-gray-600">Dashboard Admin menyajikan metrik operasional seluruh Koperasi Desa. Gunakan menu sidebar untuk navigasi.</p>
+                    </div>
+                </div>
+
+                <!-- ADMIN TAB 2: KELOLA KOPDES -->
+                <div id="atab-kopdes" class="admin-tab-content hidden space-y-6">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-lg md:text-xl text-gray-900">Daftar Koperasi Desa (KopDes)</h3>
+                        <button class="bg-[#c52228] hover:bg-[#a51c21] text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-xs">+ Tambah KopDes</button>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase">
+                                <tr>
+                                    <th class="p-4">Nama KopDes</th>
+                                    <th class="p-4">Alamat</th>
+                                    <th class="p-4">Kode Pos</th>
+                                    <th class="p-4">Status</th>
+                                    <th class="p-4">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-150">
+                                <tr>
+                                    <td class="p-4 font-semibold text-gray-900">Koperasi Desa Sukamaju Mandiri</td>
+                                    <td class="p-4 text-gray-600">Jl. Raya Sukamaju No. 12, Bogor</td>
+                                    <td class="p-4 text-gray-600 font-mono">16710</td>
+                                    <td class="p-4"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">aktif</span></td>
+                                    <td class="p-4 text-blue-600 font-semibold cursor-pointer">Edit</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-semibold text-gray-900">Koperasi Tani Makmur Berkah</td>
+                                    <td class="p-4 text-gray-600">Desa Pacet, Cianjur</td>
+                                    <td class="p-4 text-gray-600 font-mono">43253</td>
+                                    <td class="p-4"><span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">aktif</span></td>
+                                    <td class="p-4 text-blue-600 font-semibold cursor-pointer">Edit</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ADMIN TAB 3: MANAGERS -->
+                <div id="atab-managers" class="admin-tab-content hidden space-y-6">
+                    <h3 class="font-bold text-lg md:text-xl text-gray-900">Kelola Akun Manager</h3>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase">
+                                <tr>
+                                    <th class="p-4">Nama</th>
+                                    <th class="p-4">Email</th>
+                                    <th class="p-4">KopDes</th>
+                                    <th class="p-4">No. HP</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-150">
+                                <tr>
+                                    <td class="p-4 font-semibold text-gray-900">Budi Santoso</td>
+                                    <td class="p-4 text-gray-600">manager@kopdes.com</td>
+                                    <td class="p-4 font-semibold text-[#c52228]">Koperasi Desa Sukamaju Mandiri</td>
+                                    <td class="p-4 text-gray-600">081298765432</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ADMIN TAB 4: TRANSACTIONS -->
+                <div id="atab-transactions" class="admin-tab-content hidden space-y-6">
+                    <h3 class="font-bold text-lg md:text-xl text-gray-900">Semua Transaksi Koperasi</h3>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase">
+                                <tr>
+                                    <th class="p-4">Kode Transaksi</th>
+                                    <th class="p-4">KopDes</th>
+                                    <th class="p-4">Pelanggan</th>
+                                    <th class="p-4">Total</th>
+                                    <th class="p-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-150">
+                                <tr>
+                                    <td class="p-4 font-semibold text-gray-900">TRX-1790-2814</td>
+                                    <td class="p-4 text-gray-600">Koperasi Desa Sukamaju Mandiri</td>
+                                    <td class="p-4 text-gray-600">Fathur Wahid</td>
+                                    <td class="p-4 font-bold">Rp 137.000</td>
+                                    <td class="p-4"><span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700">menunggu_pembayaran</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- INTERACTIVE NAVIGATION SCRIPT                                             -->
+    <!-- ========================================================================= -->
     <script>
-        function switchRole(role) {
-            // Hide all view sections
-            document.querySelectorAll('.role-view').forEach(el => el.classList.add('hidden'));
-
-            // Show selected view section
-            const target = document.getElementById('view-' + role);
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen-container').forEach(el => el.classList.add('hidden'));
+            
+            const target = document.getElementById('screen-' + screenId);
             if (target) {
                 target.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
-            // Update toggle button states
-            document.querySelectorAll('.role-btn').forEach(btn => {
-                btn.className = 'role-btn px-4 py-1.5 rounded-lg transition-all duration-200 text-slate-600 hover:text-slate-900';
+            // Update top bar labels & button styling
+            const label = document.getElementById('current-screen-label');
+            const btnLanding = document.getElementById('btn-screen-landing');
+            const btnLogin = document.getElementById('btn-screen-login');
+
+            if (screenId === 'landing') {
+                label.textContent = 'Layar: 1. Landing Page (Guest)';
+                btnLanding.className = 'screen-btn px-3 py-1.5 rounded-lg font-bold bg-[#c52228] text-white transition-all';
+                btnLogin.className = 'screen-btn px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all';
+            } else if (screenId === 'login') {
+                label.textContent = 'Layar: 2. Halaman Login (Pilih Role)';
+                btnLogin.className = 'screen-btn px-3 py-1.5 rounded-lg font-bold bg-[#c52228] text-white transition-all';
+                btnLanding.className = 'screen-btn px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all';
+            }
+        }
+
+        function enterRole(roleName) {
+            document.querySelectorAll('.screen-container').forEach(el => el.classList.add('hidden'));
+
+            const target = document.getElementById('screen-dashboard-' + roleName);
+            if (target) {
+                target.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            const label = document.getElementById('current-screen-label');
+            label.textContent = 'Layar: Dashboard ' + roleName.toUpperCase();
+
+            // Reset navigation header buttons
+            document.getElementById('btn-screen-landing').className = 'screen-btn px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all';
+            document.getElementById('btn-screen-login').className = 'screen-btn px-3 py-1.5 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all';
+        }
+
+        // Landing tabs
+        function switchLandingTab(tabId) {
+            document.querySelectorAll('.landing-tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(tabId);
+            if (target) target.classList.remove('hidden');
+
+            const btnCatalog = document.getElementById('ltab-btn-catalog');
+            const btnProducts = document.getElementById('ltab-btn-products');
+            if (tabId === 'landing-catalog') {
+                btnCatalog.className = 'py-5 font-bold text-sm text-gray-900 border-b-2 border-[#c52228]';
+                btnProducts.className = 'py-5 font-semibold text-sm text-gray-500 hover:text-gray-900 border-b-2 border-transparent';
+            } else if (tabId === 'landing-products') {
+                btnProducts.className = 'py-5 font-bold text-sm text-gray-900 border-b-2 border-[#c52228]';
+                btnCatalog.className = 'py-5 font-semibold text-sm text-gray-500 hover:text-gray-900 border-b-2 border-transparent';
+            }
+        }
+
+        // User dashboard tabs
+        function switchUserTab(tabId) {
+            document.querySelectorAll('.user-tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(tabId);
+            if (target) target.classList.remove('hidden');
+
+            const btnIds = ['catalog', 'products', 'history', 'profile'];
+            btnIds.forEach(id => {
+                const b = document.getElementById('ubtn-' + id);
+                if (b) {
+                    if ('utab-' + id === tabId) {
+                        b.className = 'py-5 font-bold text-sm text-gray-900 border-b-2 border-[#c52228]';
+                    } else {
+                        b.className = 'py-5 font-semibold text-sm text-gray-500 hover:text-gray-900 border-b-2 border-transparent';
+                    }
+                }
             });
+        }
 
-            const activeBtn = document.getElementById('btn-role-' + role);
-            if (activeBtn) {
-                activeBtn.className = 'role-btn px-4 py-1.5 rounded-lg transition-all duration-200 bg-white text-[#c52228] shadow-xs font-bold';
+        // Manager dashboard tabs
+        function switchManagerTab(tabId, btnEl) {
+            document.querySelectorAll('.manager-tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(tabId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.mtab-btn').forEach(b => {
+                b.className = 'mtab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 flex items-center';
+            });
+            if (btnEl) {
+                btnEl.className = 'mtab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all bg-red-50 text-[#c52228] flex items-center';
             }
+        }
+
+        // Admin dashboard tabs
+        function switchAdminTab(tabId, btnEl) {
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(tabId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.atab-btn').forEach(b => {
+                b.className = 'atab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:bg-gray-50 text-gray-600 flex items-center';
+            });
+            if (btnEl) {
+                btnEl.className = 'atab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold transition-all bg-red-50 text-[#c52228] flex items-center';
+            }
+        }
+
+        // Cart Checkbox Interactive Calculator
+        function toggleDemoSelectAll(masterCb) {
+            document.querySelectorAll('.demo-item-cb').forEach(cb => {
+                cb.checked = masterCb.checked;
+            });
+            updateDemoCartTotal();
+        }
+
+        function updateDemoCartTotal() {
+            const checked = document.querySelectorAll('.demo-item-cb:checked').length;
+            const countLabel = document.getElementById('demo-selected-count');
+            const priceLabel = document.getElementById('demo-selected-price');
+
+            if (countLabel) countLabel.textContent = checked + ' barang';
+
+            let total = 0;
+            if (checked === 2) total = 137000;
+            else if (checked === 1) total = 72000;
+            else total = 0;
+
+            if (priceLabel) priceLabel.textContent = 'Rp ' + total.toLocaleString('id-ID');
         }
     </script>
 </body>
